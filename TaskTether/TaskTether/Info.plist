@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
 	<key>NSRemindersUsageDescription</key>
 	<string>TaskTether needs access to Reminders to sync your TaskTether list with Google Tasks.</string>
 	<key>CFBundleURLTypes</key>

@@ -95,14 +95,27 @@ struct TodayView: View {
                         }
                     }
                 }
-                // Tint scrollbar to match theme
-                .scrollIndicatorsFlash(onAppear: false)
+                .modifier(NoScrollFlashOnAppear())
             }
         }
         // Pin content to top — without this the VStack centres its content
         // when the frame (constrained to shellHeight) is taller than the
         // content, causing the add field to appear displaced.
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+}
+
+// MARK: - NoScrollFlashOnAppear
+// .scrollIndicatorsFlash(onAppear:) requires macOS 14+.
+// This modifier applies it on supported versions and is a no-op on macOS 12–13.
+
+private struct NoScrollFlashOnAppear: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 14, *) {
+            content.scrollIndicatorsFlash(onAppear: false)
+        } else {
+            content
+        }
     }
 }
 

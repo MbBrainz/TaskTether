@@ -116,7 +116,7 @@ private struct GeneralSettingsTab: View {
                             Text(lang.name).tag(lang.id)
                         }
                     }
-                    .onChange(of: selectedLanguage) { _, newValue in
+                    .onChange(of: selectedLanguage) { newValue in
                         if newValue == "system" {
                             UserDefaults.standard.removeObject(forKey: "AppleLanguages")
                         } else {
@@ -133,7 +133,7 @@ private struct GeneralSettingsTab: View {
                 // MARK: Dock
                 Section(String(localized: "settings.section.dock")) {
                     Toggle(String(localized: "settings.dock.label"), isOn: $showInDock)
-                        .onChange(of: showInDock) { _, newValue in
+                        .onChange(of: showInDock) { newValue in
                             UserDefaults.standard.set(newValue, forKey: "showInDock")
                         }
 
@@ -202,7 +202,7 @@ private struct GeneralSettingsTab: View {
                     }
                 }
             }
-        .formStyle(.grouped)
+        .modifier(GroupedFormStyle())
         .modifier(AlwaysScrollIndicators())
         .padding(.vertical, 8)
         .alert(
@@ -266,6 +266,20 @@ private struct ThemeSwatchRow: View {
         ("Text",    themeManager.textPrimary),
         ("Spark",   themeManager.sparkline)
     ]}
+}
+
+// MARK: - GroupedFormStyle
+// .formStyle(.grouped) requires macOS 13+. On macOS 12, Form already renders
+// in a grouped style by default, so the modifier is a no-op fallback.
+
+private struct GroupedFormStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 13, *) {
+            content.formStyle(.grouped)
+        } else {
+            content
+        }
+    }
 }
 
 // MARK: - AlwaysScrollIndicators

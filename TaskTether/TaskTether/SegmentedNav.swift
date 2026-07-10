@@ -60,7 +60,7 @@ struct SegmentedNav: View {
         // When the binding changes, animate the local pill indicator with a spring.
         // This is safe because animatedSelection only affects position within the pill —
         // it never changes the window size.
-        .onChange(of: selection) { _, newValue in
+        .onChange(of: selection) { newValue in
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 animatedSelection = newValue
             }
@@ -79,8 +79,8 @@ struct SegmentedNav: View {
         let isActive = animatedSelection == panel
 
         Button {
-            // Change binding with NO animation — window resize must be instant
-            // to avoid MenuBarExtra constraint loop crash.
+            // Change binding with NO animation — keeps the height change instant
+            // and lets animatedTodayOpen drive the spring separately.
             var t = Transaction(animation: nil)
             t.disablesAnimations = true
             withTransaction(t) { selection = panel }
@@ -99,6 +99,7 @@ struct SegmentedNav: View {
                 }
         }
         .buttonStyle(.plain)
+        .contentShape(Rectangle())
     }
 
     // MARK: - Glass Indicator
@@ -127,18 +128,24 @@ struct SegmentedNav: View {
 }
 
 // MARK: - Preview
+// @Previewable requires macOS 14+. Use a wrapper struct so the preview
+// compiles on macOS 12.
 
 #Preview {
-    @Previewable @State var panel: Panel = .compact
-
-    VStack(spacing: 16) {
-        SegmentedNav(selection: $panel)
-        Text("Active: \(panel.rawValue)")
-            .font(.system(size: 11, design: .monospaced))
-            .foregroundStyle(Color(hex: "#7A6A58"))
+    struct Wrapper: View {
+        @State private var panel: Panel = .compact
+        var body: some View {
+            VStack(spacing: 16) {
+                SegmentedNav(selection: $panel)
+                Text("Active: \(panel.rawValue)")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(Color(hex: "#7A6A58"))
+            }
+            .padding(14)
+            .background(Color(hex: "#E8DDD0"))
+            .frame(width: 300)
+            .environmentObject(ThemeManager())
+        }
     }
-    .padding(14)
-    .background(Color(hex: "#E8DDD0"))
-    .frame(width: 300)
-    .environmentObject(ThemeManager())
+    return Wrapper()
 }

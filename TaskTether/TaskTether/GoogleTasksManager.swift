@@ -253,14 +253,13 @@ class GoogleTasksManager: ObservableObject {
               let listId = taskListId else { completion?(nil); return }
 
         var taskData: [String: Any] = ["title": title]
-        // Append URL to notes using separator so it can be parsed back out
-        let notesWithURL: String?
-        if let url = url {
-            notesWithURL = (notes ?? "") + "\n---url---\n" + url.absoluteString
-        } else {
-            notesWithURL = notes
-        }
-        if let n = notesWithURL { taskData["notes"] = n }
+        // Google Tasks has no writable URL field — the `links` array is read-only.
+        // Embedding the URL in notes with a separator (---url---) caused visible
+        // marker text to appear in the Google Tasks UI. The URL already lives
+        // natively in EKReminder.url on the Reminders side, so nothing is lost
+        // by not mirroring it here. Parsing of the old separator is kept in
+        // GoogleTask.init for backward compatibility with existing tasks.
+        if let n = notes { taskData["notes"] = n }
 
         if let dueDate {
             taskData["due"] = Self.utcNoonString(from: dueDate)

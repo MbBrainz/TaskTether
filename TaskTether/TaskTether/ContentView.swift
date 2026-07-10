@@ -54,7 +54,10 @@ private struct WindowBackgroundSetter: NSViewRepresentable {
 
     func updateNSView(_ nsView: WindowBackgroundView, context: Context) {
         nsView.themeColor = NSColor(color)
-        nsView.window?.backgroundColor = NSColor(color)
+        // Only update if the window is opaque — transparent panels (NSPanel
+        // with isOpaque = false) manage their own background via SwiftUI.
+        guard let window = nsView.window, window.isOpaque else { return }
+        window.backgroundColor = NSColor(color)
     }
 }
 
@@ -63,9 +66,10 @@ private class WindowBackgroundView: NSView {
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        guard let window else { return }
+        // Skip transparent panels — setting backgroundColor or isOpaque here
+        // would undo the rounded-corner shadow compositing in AppDelegate.
+        guard let window, window.isOpaque else { return }
         window.backgroundColor = themeColor
-        window.isOpaque = true
     }
 }
 
@@ -102,23 +106,24 @@ struct MainContainerView: View {
     @ObservedObject var remindersManager:   RemindersManager
     @ObservedObject var googleTasksManager: GoogleTasksManager
 
-    @State private var activePanel:   Panel   = .expanded
-    @State private var engineStarted: Bool    = false
+    @State private var activePanel:      Panel   = .expanded
+    @State private var engineStarted:   Bool    = false
     // Captures the shell's intrinsic height so TodayView can be constrained to match.
     // Without this, TodayView's ScrollView reports 12-item content height to the HStack,
     // making the window far too tall even when Today is visually hidden at width=0.
-    @State private var shellHeight:   CGFloat = 0
-
-    private var todayIsOpen: Bool { activePanel == .expanded }
+    @State private var shellHeight:      CGFloat = 0
+    // Drives TodayView width/opacity via onChange so the spring animation fires in its
+    // own transaction, independent of the disablesAnimations transaction from SegmentedNav.
+    @State private var animatedTodayOpen: Bool  = true
 
     var body: some View {
-        // MenuBarExtra (.menuBarExtraStyle(.window)) anchors to the menu bar icon
-        // and grows LEFTWARD when content gets wider. So we just let content drive
-        // the width — no offsets, no fixed frames, no constraint loops.
+        // The popover anchors to the status bar icon and grows LEFTWARD when
+        // content gets wider. Content width drives the popover size — no fixed
+        // frames or constraint loops needed.
         //   Compact:  300px (Shell only)
-        //   Expanded: 601px (TodayView + divider + Shell)
-        // The right edge stays fixed. macOS handles the rest.
-        HStack(spacing: 0) {
+        //   Expanded: 601px (task panel + divider + Shell)
+        // The right edge stays fixed. NSPopover handles the rest.
+        HStack(alignment: .top, spacing: 0) {
 
             // ── Today Panel (LEFT side) ──────────────────────────
             // Width animates 0 → 300. Clipped so content never bleeds.
@@ -130,14 +135,15 @@ struct MainContainerView: View {
             )
             // Height is pinned to shellHeight so TodayView's ScrollView never drives
             // the HStack (and therefore the window) to a taller size than the shell.
-            .frame(width: todayIsOpen ? DesignTokens.popoverWidth : 0,
+            // Width/opacity are driven by animatedTodayOpen (not activePanel directly)
+            // so the spring fires in its own transaction, not inside disablesAnimations.
+            .frame(width: animatedTodayOpen ? DesignTokens.popoverWidth : 0,
                    height: shellHeight > 0 ? shellHeight : nil)
-            .opacity(todayIsOpen ? 1 : 0)
-            .animation(.spring(response: 0.42, dampingFraction: 0.78), value: todayIsOpen)
+            .opacity(animatedTodayOpen ? 1 : 0)
             .clipped()
 
-            // Vertical divider — only while Today is open
-            if todayIsOpen {
+            // Vertical divider — only present while the task panel is open
+            if animatedTodayOpen {
                 Rectangle()
                     .fill(themeManager.border)
                     .frame(width: 1)
@@ -167,11 +173,19 @@ struct MainContainerView: View {
         }
         // Re-trigger sync the moment Google Tasks connects — start() fires
         // before isConnected is true so the initial sync guard fails silently.
-        .onChange(of: googleTasksManager.isConnected) { _, connected in
+        .onChange(of: googleTasksManager.isConnected) { connected in
             if connected { syncEngine.syncNow() }
         }
-        .onChange(of: remindersManager.isAuthorised) { _, authorised in
+        .onChange(of: remindersManager.isAuthorised) { authorised in
             if authorised { syncEngine.syncNow() }
+        }
+        // Animate TodayView width/opacity in a fresh spring transaction.
+        // SegmentedNav fires its change inside disablesAnimations, so this onChange
+        // is the only safe way to get the spring animation without a height-change crash.
+        .onChange(of: activePanel) { newPanel in
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.78)) {
+                animatedTodayOpen = (newPanel == .expanded)
+            }
         }
     }
 
@@ -208,9 +222,9 @@ struct MainContainerView: View {
             .fixedSize(horizontal: false, vertical: true)
 
             // Zones 5–7 — InsightPanel
-            // MenuBarExtra cannot animate height changes without crashing (constraint loop).
-            // Window height snaps instantly; content fades in/out with opacity.
-            // The pill slide in Zone 2 provides the visual transition feel.
+            // Height changes are kept instant to avoid any layout constraint loops
+            // during the popover resize. The pill slide in Zone 2 provides the
+            // visual transition feel; TodayView slides via animatedTodayOpen.
             if activePanel == .expanded {
                 shellDivider
                 InsightPanelView(
@@ -223,7 +237,7 @@ struct MainContainerView: View {
                     deltaValue:         syncEngine.statsStore.delta,
                     weekPercentages:    syncEngine.statsStore.weekPercentages()
                 )
-                // No transition — instant height change is the only safe option in MenuBarExtra
+                // No transition — height snaps instantly; only opacity/width animate
             }
 
             // Zone 8 — SyncButton (the drawer handle — moves down as drawer opens)
@@ -276,7 +290,6 @@ private struct AppTitleBar: View {
             Text(String(localized: "app.name"))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(themeManager.textPrimary)
-                .kerning(-0.02 * 16)
 
             Spacer()
 
@@ -326,6 +339,12 @@ private struct TitleBarIconButton: View {
 }
 
 // MARK: - Settings Gear Button
+//
+// SettingsLink requires macOS 13+. This plain Button achieves the same
+// result on macOS 12 by sending the AppKit selector directly:
+//   macOS 12:   showPreferencesWindow: (Preferences era)
+//   macOS 13+:  showSettingsWindow:    (Settings era)
+// Both open the window hosted by the Settings { } scene in TaskTetherApp.
 
 private struct SettingsGearButton: View {
 
@@ -333,7 +352,7 @@ private struct SettingsGearButton: View {
     @State private var isHovered = false
 
     var body: some View {
-        SettingsLink {
+        Button(action: openSettings) {
             Image(systemName: "gear")
                 .font(.system(size: 13, weight: .regular))
                 .foregroundStyle(isHovered ? themeManager.textPrimary : themeManager.textSecondary)
@@ -344,13 +363,23 @@ private struct SettingsGearButton: View {
                 )
         }
         .buttonStyle(.plain)
+        .contentShape(Rectangle())
         .help(String(localized: "tooltip.settings"))
         .onHover { isHovered = $0 }
-        // Activate the app so the Settings window appears in front.
-        // SettingsLink handles the window; simultaneousGesture handles focus.
-        .simultaneousGesture(TapGesture().onEnded {
-            NSApp.activate(ignoringOtherApps: true)
-        })
+    }
+
+    private func openSettings() {
+        NSApp.activate(ignoringOtherApps: true)
+        // Defer by one run-loop tick so activation completes before the
+        // action is dispatched — without this, sendAction can't find the
+        // SwiftUI Settings scene responder when the panel has just opened.
+        DispatchQueue.main.async {
+            if #available(macOS 13, *) {
+                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+            } else {
+                NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+            }
+        }
     }
 }
 
@@ -369,7 +398,6 @@ private struct SyncStripRow: View {
             Text(String(localized: "sync.strip.label"))
                 .font(.system(size: 9.5, design: .monospaced))
                 .textCase(.uppercase)
-                .tracking(0.06 * 9.5)
                 .foregroundStyle(themeManager.textSecondary.opacity(0.75))
 
             Spacer()
@@ -424,7 +452,6 @@ private struct ServiceColumn: View {
 
             Text(String(localized: String.LocalizationValue(status.labelKey)))
                 .font(.system(size: 9, design: .monospaced))
-                .tracking(0.04 * 9)
                 .foregroundStyle(themeManager.textTertiary)
                 .multilineTextAlignment(.center)
         }
@@ -474,7 +501,6 @@ private struct InsightPanelView: View {
                 Text(String(localized: "expanded.label.today"))
                     .font(.system(size: 9.5, design: .monospaced).weight(.medium))
                     .textCase(.uppercase)
-                    .tracking(0.10 * 9.5)
                     .foregroundStyle(themeManager.textTertiary)
                 Spacer()
                 if yesterdayTotal > 0 {
@@ -490,7 +516,6 @@ private struct InsightPanelView: View {
                     Text("\(todayScore)")
                         .font(.system(size: 52, weight: .semibold))
                         .foregroundStyle(themeManager.accent)
-                        .kerning(-0.05 * 52)
                         .monospacedDigit()
                     Text("%")
                         .font(.system(size: 22, weight: .light).italic())
@@ -512,7 +537,6 @@ private struct InsightPanelView: View {
             Text(String(localized: "expanded.label.yesterday"))
                 .font(.system(size: 9.5, design: .monospaced).weight(.medium))
                 .textCase(.uppercase)
-                .tracking(0.10 * 9.5)
                 .foregroundStyle(themeManager.textTertiary)
                 .padding(.top, 10)
                 .padding(.bottom, 8)
@@ -523,7 +547,6 @@ private struct InsightPanelView: View {
                         Text("\(yesterdayScore)")
                             .font(.system(size: 30, weight: .semibold))
                             .foregroundStyle(themeManager.accent.opacity(0.5))
-                            .kerning(-0.05 * 30)
                             .monospacedDigit()
                         Text("%")
                             .font(.system(size: 14, weight: .light).italic())
@@ -549,7 +572,6 @@ private struct InsightPanelView: View {
             Text(String(localized: "expanded.label.last7days"))
                 .font(.system(size: 9.5, design: .monospaced).weight(.medium))
                 .textCase(.uppercase)
-                .tracking(0.10 * 9.5)
                 .foregroundStyle(themeManager.textTertiary)
                 .padding(.top, 10)
 

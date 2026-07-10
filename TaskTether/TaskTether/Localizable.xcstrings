@@ -842,6 +842,54 @@
         }
       }
     },
+    "settings.dock.label" : {
+      "comment" : "Toggle label in the Dock section of Settings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إظهار الأيقونة في الـ Dock"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show icon in Dock"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dock-ikon megjelenítése"
+          }
+        }
+      }
+    },
+    "settings.dock.restart_hint" : {
+      "comment" : "Helper text shown below the dock toggle in Settings. Tells the user they must restart to apply the change.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصبح التغييرات سارية بعد إعادة تشغيل TaskTether."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takes effect after restarting TaskTether."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A változtatás a TaskTether újraindítása után lép életbe."
+          }
+        }
+      }
+    },
     "settings.language.label" : {
       "localizations" : {
         "ar" : {
@@ -979,76 +1027,6 @@
         }
       }
     },
-    "settings.section.language" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اللغة"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Language"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nyelv"
-          }
-        }
-      }
-    },
-    "settings.dock.label" : {
-      "comment" : "Toggle label in the Dock section of Settings.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إظهار الأيقونة في الـ Dock"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show icon in Dock"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dock-ikon megjelenítése"
-          }
-        }
-      }
-    },
-    "settings.dock.restart_hint" : {
-      "comment" : "Helper text shown below the dock toggle in Settings. Tells the user they must restart to apply the change.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تصبح التغييرات سارية بعد إعادة تشغيل TaskTether."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Takes effect after restarting TaskTether."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A változtatás a TaskTether újraindítása után lép életbe."
-          }
-        }
-      }
-    },
     "settings.section.dock" : {
       "comment" : "Section header for the Dock visibility setting in Settings.",
       "extractionState" : "manual",
@@ -1069,6 +1047,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dok"
+          }
+        }
+      }
+    },
+    "settings.section.language" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اللغة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nyelv"
           }
         }
       }
@@ -1400,6 +1400,7 @@
     },
     "sync.button" : {
       "comment" : "Label on the Sync Now button in the main view.",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1512,9 +1513,6 @@
           }
         }
       }
-    },
-    "TaskTether" : {
-
     },
     "today.add.placeholder" : {
       "comment" : "Placeholder text inside the inline add task TextField.",

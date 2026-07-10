@@ -3,64 +3,222 @@
 //  TaskTether
 //
 //  Created by Hazim Sami on 10/03/2026.
-//  Updated: 01/04/2026
+//  Updated: 07/05/2026 — replaced MenuBarExtra (macOS 13+) with
+//           NSStatusItem + NSPanel (available macOS 10.5+).
+//           NSPanel has no beak/arrow and gives full position control:
+//           the panel's right and top edges are pinned to the status item
+//           so it always grows downward and leftward when expanding.
 //
 
 import SwiftUI
+import AppKit
+
+// MARK: - App Entry Point
 
 @main
 struct TaskTetherApp: App {
 
-    @StateObject private var themeManager:       ThemeManager
-    @StateObject private var authManager:         GoogleAuthManager
-    @StateObject private var remindersManager:    RemindersManager
-    @StateObject private var googleTasksManager:  GoogleTasksManager
-    @StateObject private var syncEngine:          SyncEngine
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
-    init() {
-        let theme    = ThemeManager()
-        let auth     = GoogleAuthManager()
-        let remind   = RemindersManager()
-        let google   = GoogleTasksManager(authManager: auth)
-        let engine   = SyncEngine(
+    var body: some Scene {
+        // Settings window — hosted by SwiftUI, opened via AppKit selector.
+        // Environment objects are supplied from AppDelegate so the same
+        // instances are shared with the panel content.
+        Settings {
+            SettingsView()
+                .environmentObject(appDelegate.themeManager)
+                .environmentObject(appDelegate.authManager)
+        }
+    }
+}
+
+// MARK: - KeyablePanel
+// borderless NSPanel.canBecomeKey returns false by default, which prevents:
+//   - text fields from receiving keyboard focus (can't type tasks)
+//   - NSApp.sendAction from traversing the right responder chain (settings broken)
+// Overriding restores standard key-window behaviour while keeping the
+// borderless, arrow-free appearance.
+
+private final class KeyablePanel: NSPanel {
+    override var canBecomeKey: Bool  { true  }
+    override var canBecomeMain: Bool { false }
+}
+
+// MARK: - AppDelegate
+
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+
+    let themeManager:       ThemeManager
+    let authManager:        GoogleAuthManager
+    let remindersManager:   RemindersManager
+    let googleTasksManager: GoogleTasksManager
+    let syncEngine:         SyncEngine
+
+    private var statusItem:   NSStatusItem?
+    private var panel:        NSPanel?
+    private var eventMonitor: Any?
+
+    // Screen-space anchor: right edge of the status item button and the
+    // bottom edge of the menu bar. These are stored when the panel first
+    // opens and used by windowDidResize to keep the panel locked in place
+    // as the SwiftUI layout changes width/height (compact ↔ expanded).
+    private var anchorRight: CGFloat = 0
+    private var anchorTop:   CGFloat = 0
+
+    // MARK: init
+
+    override init() {
+        let theme  = ThemeManager()
+        let auth   = GoogleAuthManager()
+        let remind = RemindersManager()
+        let google = GoogleTasksManager(authManager: auth)
+        let engine = SyncEngine(
             remindersManager:   remind,
             googleTasksManager: google,
             authManager:        auth,
             themeManager:       theme
         )
-
-        _themeManager      = StateObject(wrappedValue: theme)
-        _authManager       = StateObject(wrappedValue: auth)
-        _remindersManager  = StateObject(wrappedValue: remind)
-        _googleTasksManager = StateObject(wrappedValue: google)
-        _syncEngine        = StateObject(wrappedValue: engine)
+        themeManager       = theme
+        authManager        = auth
+        remindersManager   = remind
+        googleTasksManager = google
+        syncEngine         = engine
+        super.init()
     }
 
-    var body: some Scene {
+    // MARK: applicationDidFinishLaunching
 
-        // MARK: Menu Bar Popover
-        MenuBarExtra("TaskTether", systemImage: "arrow.triangle.2.circlepath") {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        applyActivationPolicy()
+        setupMenuBar()
+    }
+
+    private func applyActivationPolicy() {
+        NSApp.setActivationPolicy(
+            UserDefaults.standard.bool(forKey: "showInDock") ? .regular : .accessory
+        )
+    }
+
+    // MARK: - Menu Bar
+
+    private func setupMenuBar() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        if let button = statusItem?.button {
+            button.image = NSImage(
+                systemSymbolName: "arrow.triangle.2.circlepath",
+                accessibilityDescription: "TaskTether"
+            )
+            button.action = #selector(handleStatusItemClick)
+            button.target = self
+        }
+
+        let hosting = NSHostingController(rootView:
             ContentView()
                 .environmentObject(themeManager)
                 .environmentObject(authManager)
                 .environmentObject(remindersManager)
                 .environmentObject(googleTasksManager)
                 .environmentObject(syncEngine)
-                .onAppear {
-                    // NSApp is guaranteed to exist by the time the first view appears.
-                    // Applying activation policy in App.init() crashes because NSApp
-                    // is not yet initialised at that point.
-                    let showInDock = UserDefaults.standard.bool(forKey: "showInDock")
-                    NSApp.setActivationPolicy(showInDock ? .regular : .accessory)
-                }
-        }
-        .menuBarExtraStyle(.window)
+        )
 
-        // MARK: Settings Window
-        Settings {
-            SettingsView()
-                .environmentObject(themeManager)
-                .environmentObject(authManager)
+        // KeyablePanel (NSPanel subclass) instead of NSPopover:
+        //   - No triangular beak — clean flush appearance under the menu bar
+        //   - Full position control — right/top edges stay pinned on resize
+        //   - canBecomeKey = true enables text field focus and sendAction routing
+        //   - borderless + nonactivatingPanel available from macOS 10.5
+        let p = KeyablePanel(
+            contentRect: .zero,
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        p.contentViewController = hosting
+        p.isOpaque = false
+        p.backgroundColor = .clear
+        p.level = .popUpMenu
+        p.hasShadow = true
+        p.isMovable = false
+        p.collectionBehavior = [.canJoinAllSpaces]
+        p.delegate = self
+
+        // Rounded corners — mask the content view layer so the system shadow
+        // (computed from opaque pixels in a transparent window) follows the shape.
+        p.contentView?.wantsLayer = true
+        p.contentView?.layer?.cornerRadius = 10
+        p.contentView?.layer?.masksToBounds = true
+
+        panel = p
+    }
+
+    // MARK: - Toggle
+
+    @objc private func handleStatusItemClick(_ sender: AnyObject?) {
+        guard let p = panel else { return }
+        p.isVisible ? hidePanel() : showPanel()
+    }
+
+    private func showPanel() {
+        guard let p = panel,
+              let button = statusItem?.button,
+              let buttonWindow = button.window else { return }
+
+        // Convert the status item button to screen coordinates.
+        let buttonRectInWindow = button.convert(button.bounds, to: nil)
+        let buttonScreenRect   = buttonWindow.convertToScreen(buttonRectInWindow)
+
+        // Store the anchor corner — right edge of the button, bottom of the
+        // menu bar. windowDidResize uses these to keep the panel locked.
+        anchorRight = buttonScreenRect.maxX
+        anchorTop   = buttonScreenRect.minY
+
+        positionPanel()
+
+        p.orderFrontRegardless()
+        p.makeKey()
+        NSApp.activate(ignoringOtherApps: true)
+
+        // Dismiss on any click outside the panel (in another app or the
+        // desktop). Clicks inside the panel are local events and do not
+        // trigger the global monitor, so they are handled normally.
+        eventMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown]
+        ) { [weak self] _ in self?.hidePanel() }
+    }
+
+    private func hidePanel() {
+        panel?.orderOut(nil)
+        if let m = eventMonitor { NSEvent.removeMonitor(m); eventMonitor = nil }
+    }
+
+    // Sets the panel origin so its right edge = anchorRight and its top
+    // edge = anchorTop (flush with the bottom of the menu bar), then clamps
+    // to keep the panel inside the visible screen area.
+    private func positionPanel() {
+        guard let p = panel, anchorRight > 0 else { return }
+
+        let size = p.frame.size
+        var origin = CGPoint(
+            x: anchorRight - size.width,
+            y: anchorTop   - size.height
+        )
+
+        if let screen = p.screen ?? NSScreen.main {
+            let v = screen.visibleFrame
+            origin.x = max(origin.x, v.minX + 4)
+            origin.x = min(origin.x, v.maxX - size.width - 4)
+            origin.y = max(origin.y, v.minY + 4)
         }
+
+        p.setFrameOrigin(origin)
+    }
+
+    // MARK: - NSWindowDelegate
+
+    // Called after every SwiftUI-driven resize (compact ↔ expanded, or when
+    // the task list height changes). Re-snaps the panel so the right and top
+    // edges stay pinned — the panel grows leftward and downward only.
+    func windowDidResize(_ notification: Notification) {
+        guard let p = panel, notification.object as? NSWindow === p else { return }
+        positionPanel()
     }
 }

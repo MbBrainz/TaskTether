@@ -57,7 +57,7 @@ struct TaskRow: View {
                         ? themeManager.textTertiary
                         : themeManager.textPrimary
                 )
-                .strikethrough(task.isCompleted, color: themeManager.textTertiary)
+                .modifier(ConditionalStrikethrough(active: task.isCompleted))
                 .lineLimit(2)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -112,6 +112,22 @@ private struct TaskCheckbox: View {
         }
         .buttonStyle(.plain)
         .animation(.easeInOut(duration: DesignTokens.animFast), value: isCompleted)
+    }
+}
+
+// MARK: - ConditionalStrikethrough
+// .strikethrough(_ isActive: Bool) requires macOS 13+.
+// On macOS 12, completed tasks degrade gracefully without strikethrough.
+
+private struct ConditionalStrikethrough: ViewModifier {
+    let active: Bool
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(macOS 13, *) {
+            content.strikethrough(active)
+        } else {
+            content
+        }
     }
 }
 
