@@ -21,7 +21,10 @@ class GoogleAuthManager: ObservableObject {
     private var accessToken: String? = nil
     private var refreshToken: String? = nil
 
-    private let redirectURI = "http://localhost:8080"
+    // Built per sign-in attempt from the ephemeral port the local listener
+    // reports — see LocalHTTPServer.start. Also used by the token exchange,
+    // which must send the exact redirect_uri the auth request used.
+    private var redirectURI = ""
     private let scope = "https://www.googleapis.com/auth/tasks"
     private let server = LocalHTTPServer()
 
@@ -56,10 +59,31 @@ class GoogleAuthManager: ObservableObject {
         // before starting a new one — otherwise port 8080 stays locked.
         server.stop()
 
-        // Start local server to catch the redirect
-        server.start { [weak self] code in
-            self?.exchangeCodeForTokens(code: code)
+        // Start the local listener on an ephemeral port. The browser is only
+        // opened AFTER the listener reports it is ready — opening it earlier
+        // (as the old fixed-port code did) let the user approve access while
+        // nothing of ours was listening, silently losing the auth code.
+        server.start(
+            onCode: { [weak self] code in
+                self?.exchangeCodeForTokens(code: code)
+            },
+            onReady: { [weak self] port in
+                DispatchQueue.main.async {
+                    self?.openAuthURL(port: port)
+                }
+            }
+        )
+    }
+
+    private func openAuthURL(port: UInt16?) {
+        guard let port else {
+            errorMessage = String(localized: "error.auth.port")
+            isAuthenticating = false
+            server.stop()
+            return
         }
+
+        redirectURI = "http://localhost:\(port)"
 
         // Build the Google auth URL
         var components = URLComponents(string: "https://accounts.google.com/o/oauth2/v2/auth")!

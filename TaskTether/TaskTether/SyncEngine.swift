@@ -34,14 +34,24 @@ class SyncEngine: ObservableObject {
     private let googleTasksManager: GoogleTasksManager
     private let authManager:        GoogleAuthManager
     private let themeManager:       ThemeManager
-    let idStore:                    IDStore    = IDStore()
-    let statsStore:                 StatsStore = StatsStore()
+    let idStore:                    IDStore       = IDStore()
+    let statsStore:                 StatsStore    = StatsStore()
+    private let snapshotStore:      SnapshotStore = SnapshotStore()
 
     // MARK: - Internal State
 
     private var previousSnapshot:    [TetherTask] = []
     private var timer:               Timer?
     private var isSyncing            = false
+
+    // True when the next sync must run in reconciliation mode — see init.
+    // Cleared after the first successful sync writes a fresh baseline.
+    private var needsReconciliation  = false
+
+    // Gap after which the baseline is no longer trusted for deletions.
+    // 24 hours: comfortably longer than any normal between-sync interval,
+    // comfortably shorter than "I stopped using the app for weeks".
+    private static let reconciliationGap: TimeInterval = 24 * 60 * 60
 
     // Deletion candidates from the previous sync cycle.
     // A task must be absent from Google for TWO consecutive cycles before
@@ -62,6 +72,31 @@ class SyncEngine: ObservableObject {
         self.googleTasksManager = googleTasksManager
         self.authManager        = authManager
         self.themeManager       = themeManager
+
+        // Restore the baseline from the previous session so the first sync
+        // after a relaunch performs a real three-way merge instead of
+        // starting blind.
+        let restored          = snapshotStore.load()
+        self.previousSnapshot = restored ?? []
+        self.lastSyncAt       = snapshotStore.lastSyncAt
+
+        // Reconciliation is required when there is no baseline at all, or
+        // the last sync is older than the gap threshold. In either case the
+        // stored links may point at tasks that were deleted or re-created
+        // while the app was off, so the first sync must not delete anything.
+        let lastSync = snapshotStore.lastSyncAt
+        self.needsReconciliation = restored == nil
+            || lastSync == nil
+            || Date().timeIntervalSince(lastSync!) > Self.reconciliationGap
+    }
+
+    // MARK: - Baseline Persistence
+
+    // Called at every point previousSnapshot is reassigned so the on-disk
+    // baseline can never drift from the in-memory one.
+    private func persistBaseline() {
+        snapshotStore.save(previousSnapshot)
+        snapshotStore.lastSyncAt = lastSyncAt
     }
 
     // MARK: - Lifecycle
@@ -120,11 +155,23 @@ class SyncEngine: ObservableObject {
             async let googleTasksFetch = fetchGoogleTasks()
             let (reminderTasks, googleTasks) = try await (remindersFetch, googleTasksFetch)
 
-            let diff = buildDiff(
-                remindersTasks: reminderTasks,
-                googleTasks:    googleTasks,
-                previous:       previousSnapshot
-            )
+            let diff: SyncDiff
+            if needsReconciliation {
+                #if DEBUG
+                print("SyncEngine: reconciliation sync — links repaired, no deletions")
+                #endif
+                repairLinks(remindersTasks: reminderTasks, googleTasks: googleTasks)
+                diff = buildReconciliationDiff(
+                    remindersTasks: reminderTasks,
+                    googleTasks:    googleTasks
+                )
+            } else {
+                diff = buildDiff(
+                    remindersTasks: reminderTasks,
+                    googleTasks:    googleTasks,
+                    previous:       previousSnapshot
+                )
+            }
 
             await applyDiff(diff)
 
@@ -184,6 +231,10 @@ class SyncEngine: ObservableObject {
             previousSnapshot = tasks
             lastSyncAt       = Date()
             state            = .idle
+            persistBaseline()
+            // A fresh baseline now exists — normal diffing (including
+            // deletion detection) is safe from the next cycle onwards.
+            needsReconciliation = false
 
             // Record today's stats — done after sort so todayTasks is accurate.
             // Clear today's entry when there are no tasks so stale data from a
@@ -364,6 +415,120 @@ class SyncEngine: ObservableObject {
                 if !gTask.isCompleted {
                     diff.addToReminders.append(gTask)
                 }
+            }
+        }
+
+        return diff
+    }
+
+    // MARK: - Reconciliation
+    //
+    // Runs as the FIRST sync when the app has been off long enough that the
+    // stored links can no longer be trusted (baseline missing, or last sync
+    // older than reconciliationGap). Rules:
+    //
+    //   1. NO deletions on either side, ever. A task absent from one side
+    //      might have been deleted intentionally weeks ago — but it might
+    //      also be a re-created duplicate or a transient fetch gap. Genuine
+    //      deletions still propagate, one cycle later, via the normal
+    //      candidate system once a fresh baseline exists.
+    //   2. Links whose Google side vanished are re-pointed at an unlinked
+    //      Google task with the same title when one exists — this heals the
+    //      common "deleted and re-typed while rearranging" case without
+    //      creating duplicates.
+    //   3. Linked pairs whose content differs are resolved by real
+    //      modification timestamps (EKReminder.lastModifiedDate vs Google's
+    //      updated field) — newer side wins, regardless of platform.
+    //   4. Everything unlinked is merged additively.
+    //
+    // Worst case after a very long gap is a resurrected or duplicated task
+    // the user deletes once by hand — never silent data loss.
+
+    // Re-points links whose Google side no longer exists at an unlinked
+    // Google task with an identical title and completion state, when
+    // available. Mutates IDStore directly.
+    @MainActor
+    private func repairLinks(
+        remindersTasks: [TetherTask],
+        googleTasks:    [TetherTask]
+    ) {
+        let googleByGid = Dictionary(uniqueKeysWithValues:
+            googleTasks.compactMap { t in t.googleTasksId.map { ($0, t) } })
+
+        // Google tasks not currently linked to any reminder.
+        var unmatchedGoogle = googleTasks.filter { gTask in
+            guard let gid = gTask.googleTasksId else { return false }
+            return idStore.remindersId(for: gid) == nil
+        }
+
+        for rTask in remindersTasks {
+            guard let rid = rTask.remindersId else { continue }
+            // Only repair dead links — a link is dead when its Google task
+            // is absent from the fetch. Live links are left untouched.
+            if let gid = idStore.googleId(for: rid), googleByGid[gid] != nil { continue }
+
+            if let matchIdx = unmatchedGoogle.firstIndex(where: {
+                $0.title == rTask.title && $0.isCompleted == rTask.isCompleted
+            }) {
+                let match = unmatchedGoogle.remove(at: matchIdx)
+                if let newGid = match.googleTasksId {
+                    idStore.link(remindersId: rid, googleId: newGid)
+                    #if DEBUG
+                    print("SyncEngine: re-linked '\(rTask.title)' to re-created Google task")
+                    #endif
+                }
+            }
+        }
+    }
+
+    // Builds a deletion-free diff: timestamp conflict resolution for linked
+    // pairs, additive merge for everything else. Run after repairLinks.
+    @MainActor
+    private func buildReconciliationDiff(
+        remindersTasks: [TetherTask],
+        googleTasks:    [TetherTask]
+    ) -> SyncDiff {
+        var diff = SyncDiff()
+
+        let googleByGid = Dictionary(uniqueKeysWithValues:
+            googleTasks.compactMap { t in t.googleTasksId.map { ($0, t) } })
+
+        var linkedGids = Set<String>()
+
+        for rTask in remindersTasks {
+            guard let rid = rTask.remindersId else { continue }
+
+            if let gid = idStore.googleId(for: rid) {
+                linkedGids.insert(gid)
+                if let gTask = googleByGid[gid] {
+                    // Linked pair present on both sides — content conflict
+                    // resolved by real modification timestamps, newer wins.
+                    if rTask != gTask {
+                        if rTask.lastModified >= gTask.lastModified {
+                            diff.updateInGoogle.append(rTask)
+                        } else {
+                            diff.updateInReminders.append(gTask)
+                        }
+                    }
+                }
+                // Dead link with no re-created match: leave both the task
+                // and the link alone. If the other side was deliberately
+                // deleted, the normal candidate system propagates it safely
+                // over the next cycles — with a fresh baseline behind it.
+            } else {
+                // Never linked — push to Google.
+                diff.addToGoogle.append(rTask)
+            }
+        }
+
+        for gTask in googleTasks {
+            guard let gid = gTask.googleTasksId,
+                  !linkedGids.contains(gid),
+                  idStore.remindersId(for: gid) == nil else { continue }
+            // Unlinked Google task — mirror to Reminders unless completed
+            // (re-creating a finished task would undo the user's action).
+            if !gTask.isCompleted {
+                diff.addToReminders.append(gTask)
             }
         }
 
@@ -585,6 +750,7 @@ class SyncEngine: ObservableObject {
 
         tasks            = sortedByOrder(tasks)
         previousSnapshot = tasks
+        persistBaseline()
 
         // Update stats immediately so InsightPanel reflects the toggle without
         // waiting for the next sync cycle.
@@ -637,6 +803,7 @@ class SyncEngine: ObservableObject {
         )
         tasks.insert(task, at: 0)
         previousSnapshot = tasks
+        persistBaseline()
 
         Task { @MainActor [weak self] in
             guard let self else { return }
@@ -676,6 +843,7 @@ class SyncEngine: ObservableObject {
             }
 
             previousSnapshot = tasks
+            persistBaseline()
         }
     }
 
@@ -684,6 +852,7 @@ class SyncEngine: ObservableObject {
         guard let idx = tasks.firstIndex(where: { $0.id == id }) else { return }
         let task = tasks.remove(at: idx)
         previousSnapshot = tasks
+        persistBaseline()
 
         let todayAllAfterDelete = todayTasks
         statsStore.record(

@@ -1,1753 +1,1906 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "" : {
-
+  "sourceLanguage": "en",
+  "strings": {
+    "": {},
+    "—": {},
+    "%": {},
+    "%@ %@%lld%% vs yesterday": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ %2$@%3$lld%% vs yesterday"
+          }
+        }
+      }
+    },
+    "%lld": {},
+    "%lld / %lld %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld / %2$lld %3$@"
+          }
+        }
+      }
+    },
+    "app.name": {
+      "comment": "The application name, shown in the menu bar popover header.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TaskTether"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TaskTether"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TaskTether"
+          }
+        }
+      }
+    },
+    "connect.button.idle": {
+      "comment": "Label on the Google sign-in button when idle.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ربط حساب Google"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect Google Account"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google-fiók összekapcsolása"
+          }
+        }
+      }
     },
-    "—" : {
-
+    "connect.button.loading": {
+      "comment": "Label on the Google sign-in button while authentication is in progress.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ الاتصال…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecting..."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kapcsolódás…"
+          }
+        }
+      }
     },
-    "%" : {
-
+    "connect.description": {
+      "comment": "Short description shown on the connect screen below the app name.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "زامن تذكيرات Apple مع مهام Google بسلاسة."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync Apple Reminders with Google Tasks seamlessly."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szinkronizáld az Apple Emlékeztetőket a Google Feladatokkal."
+          }
+        }
+      }
     },
-    "%@ %@%lld%% vs yesterday" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$@%3$lld%% vs yesterday"
+    "error.auth.token": {
+      "comment": "Error shown when the OAuth token exchange with Google fails.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فشل تبادل الرمز"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token exchange failed"
           }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token csere sikertelen"
+          }
         }
       }
     },
-    "%lld" : {
-
+    "error.auth.url": {
+      "comment": "Error shown when the Google OAuth URL cannot be constructed.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر إنشاء رابط المصادقة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not build auth URL"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nem sikerült létrehozni a hitelesítési URL-t"
+          }
+        }
+      }
     },
-    "%lld / %lld %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld / %2$lld %3$@"
+    "error.credentials": {
+      "comment": "Error shown when GoogleCredentials.json cannot be loaded from the bundle.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر تحميل بيانات الاعتماد"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load credentials"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nem sikerült betölteni a hitelesítő adatokat"
           }
         }
       }
     },
-    "app.name" : {
-      "comment" : "The application name, shown in the menu bar popover header.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TaskTether"
+    "error.reminders.createlist": {
+      "comment": "Error shown when the TaskTether list cannot be created in Reminders. %@ is replaced with the system error description.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر إنشاء قائمة TaskTether: %@"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TaskTether"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not create TaskTether list: %@"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TaskTether"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nem sikerült létrehozni a TaskTether listát: %@"
           }
         }
       }
     },
-    "connect.button.idle" : {
-      "comment" : "Label on the Google sign-in button when idle.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ربط حساب Google"
+    "error.reminders.denied.v12": {
+      "comment": "Error shown on macOS 12–13 (Monterey/Ventura) when Reminders access is denied. 'System Preferences' is the correct name on those versions.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم رفض الوصول إلى التذكيرات. يُرجى التفعيل من تفضيلات النظام ← الأمان والخصوصية ← التذكيرات."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Connect Google Account"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders access denied. Please enable in System Preferences → Security & Privacy → Reminders."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google-fiók összekapcsolása"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az Emlékeztetők hozzáférése megtagadva. Engedélyezd a Rendszerbeállítások → Biztonság és adatvédelem → Emlékeztetők menüpontban."
           }
         }
       }
     },
-    "connect.button.loading" : {
-      "comment" : "Label on the Google sign-in button while authentication is in progress.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "جارٍ الاتصال…"
+    "error.reminders.denied.v14": {
+      "comment": "Error shown on macOS 14+ (Sonoma and later) when Reminders access is denied. 'System Settings' is the correct name from macOS 13 onwards.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم رفض الوصول إلى التذكيرات. يُرجى التفعيل من إعدادات النظام ← الخصوصية ← التذكيرات."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Connecting..."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders access denied. Please enable in System Settings → Privacy → Reminders."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kapcsolódás…"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az Emlékeztetők hozzáférése megtagadva. Engedélyezd a Rendszerbeállítások → Adatvédelem → Emlékeztetők menüpontban."
           }
         }
       }
     },
-    "connect.description" : {
-      "comment" : "Short description shown on the connect screen below the app name.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "زامن تذكيرات Apple مع مهام Google بسلاسة."
+    "error.tasks.createlist": {
+      "comment": "Error shown when the TaskTether list cannot be created in Google Tasks.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر إنشاء قائمة TaskTether"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync Apple Reminders with Google Tasks seamlessly."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not create TaskTether list"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szinkronizáld az Apple Emlékeztetőket a Google Feladatokkal."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nem sikerült létrehozni a TaskTether listát"
           }
         }
       }
     },
-    "error.auth.token" : {
-      "comment" : "Error shown when the OAuth token exchange with Google fails.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فشل تبادل الرمز"
+    "error.tasks.fetchlists": {
+      "comment": "Error shown when the Google Tasks list fetch request fails or returns unexpected data.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر جلب قوائم المهام"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Token exchange failed"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not fetch task lists"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Token csere sikertelen"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nem sikerült lekérni a feladatlistákat"
           }
         }
       }
     },
-    "error.auth.url" : {
-      "comment" : "Error shown when the Google OAuth URL cannot be constructed.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعذّر إنشاء رابط المصادقة"
+    "error.tasks.notoken": {
+      "comment": "Error shown internally when Google Tasks setup is attempted but no access token is available.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يوجد رمز وصول"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not build auth URL"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No access token"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem sikerült létrehozni a hitelesítési URL-t"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nincs hozzáférési token"
           }
         }
       }
     },
-    "error.credentials" : {
-      "comment" : "Error shown when GoogleCredentials.json cannot be loaded from the bundle.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعذّر تحميل بيانات الاعتماد"
+    "expanded.delta.down": {
+      "comment": "Delta label shown in the Expanded view when today's score is lower than yesterday's. %lld is the signed integer difference (will be negative, e.g. -12).",
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %lld%% مقارنةً بالأمس"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not load credentials"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %lld%% vs yesterday"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem sikerült betölteni a hitelesítő adatokat"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↓ %lld%% tegnap képest"
           }
         }
       }
     },
-    "error.reminders.createlist" : {
-      "comment" : "Error shown when the TaskTether list cannot be created in Reminders. %@ is replaced with the system error description.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعذّر إنشاء قائمة TaskTether: %@"
+    "expanded.delta.up": {
+      "comment": "Delta label shown in the Expanded view when today's score is higher than yesterday's. %lld is the positive integer difference (e.g. 12).",
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ +%lld%% مقارنةً بالأمس"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not create TaskTether list: %@"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ +%lld%% vs yesterday"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem sikerült létrehozni a TaskTether listát: %@"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑ +%lld%% tegnap képest"
           }
         }
       }
     },
-    "error.reminders.denied.v12" : {
-      "comment" : "Error shown on macOS 12–13 (Monterey/Ventura) when Reminders access is denied. 'System Preferences' is the correct name on those versions.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم رفض الوصول إلى التذكيرات. يُرجى التفعيل من تفضيلات النظام ← الأمان والخصوصية ← التذكيرات."
+    "expanded.label.last7days": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آخر 7 أيام"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reminders access denied. Please enable in System Preferences → Security & Privacy → Reminders."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last 7 Days"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az Emlékeztetők hozzáférése megtagadva. Engedélyezd a Rendszerbeállítások → Biztonság és adatvédelem → Emlékeztetők menüpontban."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elmúlt 7 nap"
           }
         }
       }
     },
-    "error.reminders.denied.v14" : {
-      "comment" : "Error shown on macOS 14+ (Sonoma and later) when Reminders access is denied. 'System Settings' is the correct name from macOS 13 onwards.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم رفض الوصول إلى التذكيرات. يُرجى التفعيل من إعدادات النظام ← الخصوصية ← التذكيرات."
+    "expanded.label.today": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اليوم"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reminders access denied. Please enable in System Settings → Privacy → Reminders."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az Emlékeztetők hozzáférése megtagadva. Engedélyezd a Rendszerbeállítások → Adatvédelem → Emlékeztetők menüpontban."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ma"
           }
         }
       }
     },
-    "error.tasks.createlist" : {
-      "comment" : "Error shown when the TaskTether list cannot be created in Google Tasks.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعذّر إنشاء قائمة TaskTether"
+    "expanded.label.yesterday": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أمس"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not create TaskTether list"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yesterday"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem sikerült létrehozni a TaskTether listát"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tegnap"
           }
         }
       }
     },
-    "error.tasks.fetchlists" : {
-      "comment" : "Error shown when the Google Tasks list fetch request fails or returns unexpected data.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعذّر جلب قوائم المهام"
+    "expanded.tasks.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مهام منجزة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not fetch task lists"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tasks done"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem sikerült lekérni a feladatlistákat"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "feladat kész"
           }
         }
       }
     },
-    "error.tasks.notoken" : {
-      "comment" : "Error shown internally when Google Tasks setup is attempted but no access token is available.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لا يوجد رمز وصول"
+    "general.quit": {
+      "comment": "Label on the Quit button shown in the connect screen.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إنهاء"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No access token"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nincs hozzáférési token"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kilépés"
           }
         }
       }
     },
-    "expanded.delta.down" : {
-      "comment" : "Delta label shown in the Expanded view when today's score is lower than yesterday's. %lld is the signed integer difference (will be negative, e.g. -12).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↓ %lld%% مقارنةً بالأمس"
+    "nav.compact": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مضغوط"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↓ %lld%% vs yesterday"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compact"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↓ %lld%% tegnap képest"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kompakt"
           }
         }
       }
     },
-    "expanded.delta.up" : {
-      "comment" : "Delta label shown in the Expanded view when today's score is higher than yesterday's. %lld is the positive integer difference (e.g. 12).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↑ +%lld%% مقارنةً بالأمس"
+    "nav.expanded": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "موسّع"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↑ +%lld%% vs yesterday"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expanded"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↑ +%lld%% tegnap képest"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kibővített"
           }
         }
       }
     },
-    "expanded.label.last7days" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "آخر 7 أيام"
+    "nav.today": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اليوم"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last 7 Days"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elmúlt 7 nap"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ma"
           }
         }
       }
     },
-    "expanded.label.today" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اليوم"
+    "service.googletasks": {
+      "comment": "Label next to the Google Tasks status dot in the main view.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مهام Google"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Today"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Tasks"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ma"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Feladatok"
           }
         }
       }
     },
-    "expanded.label.yesterday" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أمس"
+    "service.reminders": {
+      "comment": "Label next to the Reminders status dot in the main view.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التذكيرات"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yesterday"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tegnap"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emlékeztetők"
           }
         }
       }
     },
-    "expanded.tasks.done" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مهام منجزة"
+    "settings.account.google": {
+      "comment": "Read-only label showing the connected Google account row.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حساب Google"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tasks done"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google account"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feladat kész"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google-fiók"
           }
         }
       }
     },
-    "general.quit" : {
-      "comment" : "Label on the Quit button shown in the connect screen.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إنهاء"
+    "settings.alert.ok": {
+      "comment": "Dismiss button label used in Settings alerts.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حسناً"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quit"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kilépés"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         }
       }
     },
-    "nav.compact" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مضغوط"
+    "settings.appearance.dark": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "داكن دائماً"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Compact"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always Dark"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kompakt"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mindig sötét"
           }
         }
       }
     },
-    "nav.expanded" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "موسّع"
+    "settings.appearance.label": {
+      "comment": "Label for the appearance segmented control in Settings.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الوضع"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expanded"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mode"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kibővített"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mód"
           }
         }
       }
     },
-    "nav.today" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اليوم"
+    "settings.appearance.light": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فاتح دائماً"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Today"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always Light"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ma"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mindig világos"
           }
         }
       }
     },
-    "service.googletasks" : {
-      "comment" : "Label next to the Google Tasks status dot in the main view.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مهام Google"
+    "settings.appearance.system": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "النظام"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google Tasks"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google Feladatok"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rendszer"
           }
         }
       }
     },
-    "service.reminders" : {
-      "comment" : "Label next to the Reminders status dot in the main view.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "التذكيرات"
+    "settings.customtheme.description": {
+      "comment": "Helper text in the custom themes section explaining what the load button does.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحميل مظهر مجتمعي من ملف JSON."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reminders"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load a community theme from a JSON file."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Emlékeztetők"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Közösségi téma betöltése JSON fájlból."
           }
         }
       }
     },
-    "settings.account.google" : {
-      "comment" : "Read-only label showing the connected Google account row.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حساب Google"
+    "settings.customtheme.error.title": {
+      "comment": "Alert title shown when a custom theme JSON file cannot be loaded.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر تحميل المظهر"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google account"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load theme"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google-fiók"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A téma nem tölthető be"
           }
         }
       }
     },
-    "settings.alert.ok" : {
-      "comment" : "Dismiss button label used in Settings alerts.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حسناً"
+    "settings.customtheme.load": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحميل مظهر من ملف…"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load theme from file…"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téma betöltése fájlból…"
           }
         }
       }
     },
-    "settings.appearance.dark" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "داكن دائماً"
+    "settings.customtheme.panel.title": {
+      "comment": "Title bar of the NSOpenPanel when the user picks a custom theme file.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر ملف مظهر"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Always Dark"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a theme file"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mindig sötét"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Válassz témafájlt"
           }
         }
       }
     },
-    "settings.appearance.label" : {
-      "comment" : "Label for the appearance segmented control in Settings.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الوضع"
+    "settings.dock.label": {
+      "comment": "Toggle label in the Dock section of Settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إظهار الأيقونة في الـ Dock"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mode"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show icon in Dock"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mód"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock-ikon megjelenítése"
           }
         }
       }
     },
-    "settings.appearance.light" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فاتح دائماً"
+    "settings.dock.restart_hint": {
+      "comment": "Helper text shown below the dock toggle in Settings. Tells the user they must restart to apply the change.",
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تصبح التغييرات سارية بعد إعادة تشغيل TaskTether."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Always Light"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takes effect after restarting TaskTether."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mindig világos"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A változtatás a TaskTether újraindítása után lép életbe."
           }
         }
       }
     },
-    "settings.appearance.system" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "النظام"
+    "settings.language.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اللغة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rendszer"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyelv"
           }
         }
       }
     },
-    "settings.customtheme.description" : {
-      "comment" : "Helper text in the custom themes section explaining what the load button does.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تحميل مظهر مجتمعي من ملف JSON."
+    "settings.language.restart_hint": {
+      "comment": "Helper text shown below the language picker in Settings. Tells the user they must restart to apply the change.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تصبح تغييرات اللغة سارية بعد إعادة تشغيل TaskTether."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load a community theme from a JSON file."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language changes take effect after restarting TaskTether."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Közösségi téma betöltése JSON fájlból."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A nyelvi változtatások a TaskTether újraindítása után lépnek életbe."
           }
         }
       }
     },
-    "settings.customtheme.error.title" : {
-      "comment" : "Alert title shown when a custom theme JSON file cannot be loaded.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعذّر تحميل المظهر"
+    "settings.language.system": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لغة النظام الافتراضية"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not load theme"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Default"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A téma nem tölthető be"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rendszer alapértelmezett"
           }
         }
       }
     },
-    "settings.customtheme.load" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تحميل مظهر من ملف…"
+    "settings.section.account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الحساب"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load theme from file…"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Téma betöltése fájlból…"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fiók"
           }
         }
       }
     },
-    "settings.customtheme.panel.title" : {
-      "comment" : "Title bar of the NSOpenPanel when the user picks a custom theme file.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اختر ملف مظهر"
+    "settings.section.appearance": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المظهر"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose a theme file"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Válassz témafájlt"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Megjelenés"
           }
         }
       }
     },
-    "settings.dock.label" : {
-      "comment" : "Toggle label in the Dock section of Settings.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إظهار الأيقونة في الـ Dock"
+    "settings.section.customtheme": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مظاهر مخصصة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show icon in Dock"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom Themes"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dock-ikon megjelenítése"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egyéni témák"
           }
         }
       }
     },
-    "settings.dock.restart_hint" : {
-      "comment" : "Helper text shown below the dock toggle in Settings. Tells the user they must restart to apply the change.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تصبح التغييرات سارية بعد إعادة تشغيل TaskTether."
+    "settings.section.dock": {
+      "comment": "Section header for the Dock visibility setting in Settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Takes effect after restarting TaskTether."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A változtatás a TaskTether újraindítása után lép életbe."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dok"
           }
         }
       }
     },
-    "settings.language.label" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اللغة"
+    "settings.section.language": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اللغة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Language"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nyelv"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyelv"
           }
         }
       }
     },
-    "settings.language.restart_hint" : {
-      "comment" : "Helper text shown below the language picker in Settings. Tells the user they must restart to apply the change.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تصبح تغييرات اللغة سارية بعد إعادة تشغيل TaskTether."
+    "settings.section.support": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دعم TaskTether"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Language changes take effect after restarting TaskTether."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Support TaskTether"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A nyelvi változtatások a TaskTether újraindítása után lépnek életbe."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TaskTether támogatása"
           }
         }
       }
     },
-    "settings.language.system" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لغة النظام الافتراضية"
+    "settings.section.sync": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المزامنة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Default"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rendszer alapértelmezett"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szinkronizálás"
           }
         }
       }
     },
-    "settings.section.account" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الحساب"
+    "settings.section.theme": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المظهر"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Account"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theme"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fiók"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téma"
           }
         }
       }
     },
-    "settings.section.appearance" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المظهر"
+    "settings.signout": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تسجيل الخروج"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appearance"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign Out"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Megjelenés"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kijelentkezés"
           }
         }
       }
     },
-    "settings.section.customtheme" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مظاهر مخصصة"
+    "settings.support.description": {
+      "comment": "Helper text in the support section shown next to the donation button.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TaskTether مجاني ومفتوح المصدر."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Custom Themes"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TaskTether is free and open source."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egyéni témák"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A TaskTether ingyenes és nyílt forráskódú."
           }
         }
       }
     },
-    "settings.section.dock" : {
-      "comment" : "Section header for the Dock visibility setting in Settings.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dock"
+    "settings.support.link": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اشترِ لي قهوة ☕️"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dock"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buy me a coffee ☕️"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dok"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vegyél nekem egy kávét ☕️"
           }
         }
       }
     },
-    "settings.section.language" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اللغة"
+    "settings.sync.interval": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فترة المزامنة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Language"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync interval"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nyelv"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szinkronizálási időköz"
           }
         }
       }
     },
-    "settings.section.support" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "دعم TaskTether"
+    "settings.sync.interval.minutes": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d دقائق"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Support TaskTether"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d minutes"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TaskTether támogatása"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d perc"
           }
         }
       }
     },
-    "settings.section.sync" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المزامنة"
+    "settings.tab.general": {
+      "comment": "Label for the General tab in the Settings window.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عام"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szinkronizálás"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Általános"
           }
         }
       }
     },
-    "settings.section.theme" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المظهر"
+    "settings.theme.dark": {
+      "comment": "Label for the dark theme slot picker in Settings.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المظهر الداكن"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Theme"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark theme"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Téma"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sötét téma"
           }
         }
       }
     },
-    "settings.signout" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تسجيل الخروج"
+    "settings.theme.light": {
+      "comment": "Label for the light theme slot picker in Settings.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المظهر الفاتح"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign Out"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light theme"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kijelentkezés"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Világos téma"
           }
         }
       }
     },
-    "settings.support.description" : {
-      "comment" : "Helper text in the support section shown next to the donation button.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TaskTether مجاني ومفتوح المصدر."
+    "status.connected": {
+      "comment": "Accessibility label and tooltip for a connected status dot.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "متصل"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TaskTether is free and open source."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A TaskTether ingyenes és nyílt forráskódú."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Csatlakozva"
           }
         }
       }
     },
-    "settings.support.link" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اشترِ لي قهوة ☕️"
+    "status.error": {
+      "comment": "Accessibility label and tooltip for an error status dot.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خطأ"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Buy me a coffee ☕️"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vegyél nekem egy kávét ☕️"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiba"
           }
         }
       }
     },
-    "settings.sync.interval" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فترة المزامنة"
+    "status.syncing": {
+      "comment": "Accessibility label and tooltip for a syncing status dot.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ المزامنة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync interval"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Syncing"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szinkronizálási időköz"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szinkronizálás"
           }
         }
       }
     },
-    "settings.sync.interval.minutes" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d دقائق"
+    "sync.button": {
+      "comment": "Label on the Sync Now button in the main view.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مزامنة الآن"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d minutes"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync Now"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d perc"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szinkronizálás most"
           }
         }
       }
     },
-    "settings.tab.general" : {
-      "comment" : "Label for the General tab in the Settings window.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عام"
+    "sync.button.loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ المزامنة…"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "General"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Syncing…"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Általános"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szinkronizálás…"
           }
         }
       }
     },
-    "settings.theme.dark" : {
-      "comment" : "Label for the dark theme slot picker in Settings.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المظهر الداكن"
+    "sync.last.never": {
+      "comment": "Shown below the sync button when no sync has been performed yet.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آخر مزامنة: أبداً"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dark theme"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last synced: Never"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sötét téma"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utolsó szinkronizálás: Soha"
           }
         }
       }
     },
-    "settings.theme.light" : {
-      "comment" : "Label for the light theme slot picker in Settings.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المظهر الفاتح"
+    "sync.strip.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آخر مزامنة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Light theme"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last sync"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Világos téma"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utolsó szinkronizálás"
           }
         }
       }
     },
-    "status.connected" : {
-      "comment" : "Accessibility label and tooltip for a connected status dot.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "متصل"
+    "task.tomorrow.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "غداً"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Connected"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tomorrow"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Csatlakozva"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Holnap"
           }
         }
       }
     },
-    "status.error" : {
-      "comment" : "Accessibility label and tooltip for an error status dot.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خطأ"
+    "today.add.placeholder": {
+      "comment": "Placeholder text inside the inline add task TextField.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مهمة جديدة…"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New task…"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hiba"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Új feladat…"
           }
         }
       }
     },
-    "status.syncing" : {
-      "comment" : "Accessibility label and tooltip for a syncing status dot.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "جارٍ المزامنة"
+    "today.add.tooltip": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إضافة مهمة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Syncing"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add task"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szinkronizálás"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feladat hozzáadása"
           }
         }
       }
     },
-    "sync.button" : {
-      "comment" : "Label on the Sync Now button in the main view.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مزامنة الآن"
+    "today.empty.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد مهام مستحقة في قائمة TaskTether اليوم."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync Now"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing due in your TaskTether list today. "
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szinkronizálás most"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nincs esedékes feladat a TaskTether listádban ma."
           }
         }
       }
     },
-    "sync.button.loading" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "جارٍ المزامنة…"
+    "today.empty.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أنجزت كل شيء."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Syncing…"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’re all caught up. "
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szinkronizálás…"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minden feladattal készen vagy."
           }
         }
       }
     },
-    "sync.last.never" : {
-      "comment" : "Shown below the sync button when no sync has been performed yet.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "آخر مزامنة: أبداً"
+    "tooltip.googletasks.connected": {
+      "comment": "Tooltip on the Google Tasks status dot when connected.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مهام Google: متصل"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last synced: Never"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Tasks: Connected"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utolsó szinkronizálás: Soha"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Feladatok: Csatlakozva"
           }
         }
       }
     },
-    "sync.strip.label" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "آخر مزامنة"
+    "tooltip.googletasks.disconnected": {
+      "comment": "Tooltip on the Google Tasks status dot when not connected.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مهام Google: غير متصل"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last sync"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Tasks: Not connected"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utolsó szinkronizálás"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Feladatok: Nincs csatlakoztatva"
           }
         }
       }
     },
-    "task.tomorrow.hint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "غداً"
+    "tooltip.quit": {
+      "comment": "Tooltip on the quit icon button in the main view footer.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إنهاء TaskTether"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tomorrow"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit TaskTether"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Holnap"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TaskTether bezárása"
           }
         }
       }
     },
-    "today.add.placeholder" : {
-      "comment" : "Placeholder text inside the inline add task TextField.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مهمة جديدة…"
+    "tooltip.reminders.connected": {
+      "comment": "Tooltip on the Reminders status dot when connected.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التذكيرات: متصل"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New task…"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders: Connected"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Új feladat…"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emlékeztetők: Csatlakozva"
           }
         }
       }
     },
-    "today.add.tooltip" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إضافة مهمة"
+    "tooltip.reminders.disconnected": {
+      "comment": "Tooltip on the Reminders status dot when not connected.",
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التذكيرات: غير متصل"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add task"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders: Not connected"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feladat hozzáadása"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emlékeztetők: Nincs csatlakoztatva"
           }
         }
       }
     },
-    "today.empty.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لا توجد مهام مستحقة في قائمة TaskTether اليوم."
+    "tooltip.settings": {
+      "comment": "Tooltip on the gear icon button in the main view footer.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإعدادات"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing due in your TaskTether list today. "
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nincs esedékes feladat a TaskTether listádban ma."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beállítások"
           }
         }
       }
     },
-    "today.empty.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أنجزت كل شيء."
+    "settings.section.about": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حول"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You’re all caught up. "
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minden feladattal készen vagy."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Névjegy"
           }
         }
       }
     },
-    "tooltip.googletasks.connected" : {
-      "comment" : "Tooltip on the Google Tasks status dot when connected.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مهام Google: متصل"
+    "settings.about.version": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإصدار"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google Tasks: Connected"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google Feladatok: Csatlakozva"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verzió"
           }
         }
       }
     },
-    "tooltip.googletasks.disconnected" : {
-      "comment" : "Tooltip on the Google Tasks status dot when not connected.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مهام Google: غير متصل"
+    "error.auth.port": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر بدء تسجيل الدخول — لم يتمكن المستمع المحلي من فتح منفذ. حاول مرة أخرى."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google Tasks: Not connected"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in could not start — the local listener failed to open a port. Try again."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google Feladatok: Nincs csatlakoztatva"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A bejelentkezés nem indult el — a helyi figyelő nem tudott portot nyitni. Próbálja újra."
           }
         }
       }
     },
-    "tooltip.quit" : {
-      "comment" : "Tooltip on the quit icon button in the main view footer.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إنهاء TaskTether"
+    "settings.language.restart.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إعادة تشغيل TaskTether؟"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quit TaskTether"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart TaskTether?"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TaskTether bezárása"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Újraindítod a TaskTethert?"
           }
         }
       }
     },
-    "tooltip.reminders.connected" : {
-      "comment" : "Tooltip on the Reminders status dot when connected.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "التذكيرات: متصل"
+    "settings.language.restart.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تصبح اللغة الجديدة سارية بعد إعادة تشغيل TaskTether."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reminders: Connected"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The new language takes effect after TaskTether restarts."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Emlékeztetők: Csatlakozva"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az új nyelv a TaskTether újraindítása után lép életbe."
           }
         }
       }
     },
-    "tooltip.reminders.disconnected" : {
-      "comment" : "Tooltip on the Reminders status dot when not connected.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "التذكيرات: غير متصل"
+    "settings.language.restart.now": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أعد التشغيل الآن"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reminders: Not connected"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart Now"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Emlékeztetők: Nincs csatlakoztatva"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Újraindítás most"
           }
         }
       }
     },
-    "tooltip.settings" : {
-      "comment" : "Tooltip on the gear icon button in the main view footer.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الإعدادات"
+    "settings.language.restart.later": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لاحقًا"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Settings"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beállítások"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Később"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

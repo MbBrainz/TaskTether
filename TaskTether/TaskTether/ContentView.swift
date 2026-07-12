@@ -348,19 +348,49 @@ private struct TitleBarIconButton: View {
 
 private struct SettingsGearButton: View {
 
+    var body: some View {
+        if #available(macOS 14, *) {
+            ModernSettingsGearButton()
+        } else {
+            LegacySettingsGearButton()
+        }
+    }
+}
+
+// macOS 14+ — the ONLY supported way to open the Settings scene
+// programmatically. The private showSettingsWindow: selector silently
+// stopped working on newer macOS releases (observed dead on macOS 26),
+// which made the gear button do nothing at all.
+@available(macOS 14, *)
+private struct ModernSettingsGearButton: View {
+
+    @Environment(\.openSettings) private var openSettings
+    @EnvironmentObject private var themeManager: ThemeManager
+    @State private var isHovered = false
+
+    var body: some View {
+        Button {
+            NSApp.activate(ignoringOtherApps: true)
+            openSettings()
+        } label: {
+            SettingsGearLabel(isHovered: isHovered)
+        }
+        .buttonStyle(.plain)
+        .contentShape(Rectangle())
+        .help(String(localized: "tooltip.settings"))
+        .onHover { isHovered = $0 }
+    }
+}
+
+// macOS 12–13 — the legacy selectors still work there.
+private struct LegacySettingsGearButton: View {
+
     @EnvironmentObject private var themeManager: ThemeManager
     @State private var isHovered = false
 
     var body: some View {
         Button(action: openSettings) {
-            Image(systemName: "gear")
-                .font(.system(size: 13, weight: .regular))
-                .foregroundStyle(isHovered ? themeManager.textPrimary : themeManager.textSecondary)
-                .frame(width: 28, height: 28)
-                .background(
-                    RoundedRectangle(cornerRadius: 7)
-                        .fill(isHovered ? themeManager.surface2 : Color.clear)
-                )
+            SettingsGearLabel(isHovered: isHovered)
         }
         .buttonStyle(.plain)
         .contentShape(Rectangle())
@@ -380,6 +410,23 @@ private struct SettingsGearButton: View {
                 NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
             }
         }
+    }
+}
+
+private struct SettingsGearLabel: View {
+
+    @EnvironmentObject private var themeManager: ThemeManager
+    let isHovered: Bool
+
+    var body: some View {
+        Image(systemName: "gear")
+            .font(.system(size: 13, weight: .regular))
+            .foregroundStyle(isHovered ? themeManager.textPrimary : themeManager.textSecondary)
+            .frame(width: 28, height: 28)
+            .background(
+                RoundedRectangle(cornerRadius: 7)
+                    .fill(isHovered ? themeManager.surface2 : Color.clear)
+            )
     }
 }
 

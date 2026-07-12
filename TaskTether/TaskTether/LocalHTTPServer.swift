@@ -12,18 +12,54 @@ class LocalHTTPServer {
 
     private var listener: NWListener?
     private var onCode: ((String) -> Void)?
-    private let port: UInt16 = 8080
 
-    func start(onCode: @escaping (String) -> Void) {
+    // Starts listening on an EPHEMERAL port chosen by the system — never a
+    // fixed one. A fixed port (previously 8080) collides with anything else
+    // on the machine (Homebrew nginx defaults to 8080, dev servers love it),
+    // and the OAuth redirect then delivers the auth code to the wrong
+    // process. Google desktop OAuth clients accept any localhost port, so
+    // the caller builds the redirect URI from the port reported by onReady.
+    //
+    // onReady is called exactly once: with the bound port on success, or
+    // nil when the listener could not start.
+    func start(onCode: @escaping (String) -> Void, onReady: @escaping (UInt16?) -> Void) {
         self.onCode = onCode
 
         do {
-            listener = try NWListener(using: .tcp, on: NWEndpoint.Port(rawValue: port)!)
+            listener = try NWListener(using: .tcp, on: .any)
         } catch {
             #if DEBUG
             print("Failed to create listener: \(error)")
             #endif
+            onReady(nil)
             return
+        }
+
+        // Bind failures do NOT throw above — they surface asynchronously
+        // here. Without this handler the sign-in button spins forever with
+        // no explanation.
+        var reported = false
+        listener?.stateUpdateHandler = { [weak self] state in
+            switch state {
+            case .ready:
+                guard !reported else { return }
+                reported = true
+                let port = self?.listener?.port?.rawValue
+                #if DEBUG
+                print("Local HTTP server started on port \(port.map(String.init) ?? "?")")
+                #endif
+                onReady(port)
+            case .failed(let error):
+                #if DEBUG
+                print("Listener failed: \(error)")
+                #endif
+                self?.stop()
+                guard !reported else { return }
+                reported = true
+                onReady(nil)
+            default:
+                break
+            }
         }
 
         listener?.newConnectionHandler = { [weak self] connection in
@@ -32,9 +68,6 @@ class LocalHTTPServer {
         }
 
         listener?.start(queue: .global())
-        #if DEBUG
-        print("Local HTTP server started on port \(port)")
-        #endif
     }
 
     func stop() {

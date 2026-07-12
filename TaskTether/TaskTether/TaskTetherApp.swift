@@ -32,6 +32,13 @@ struct TaskTetherApp: App {
     }
 }
 
+// MARK: - Notifications
+
+extension Notification.Name {
+    // Requests the AppDelegate to close the menu bar panel.
+    static let taskTetherHidePanel = Notification.Name("taskTetherHidePanel")
+}
+
 // MARK: - KeyablePanel
 // borderless NSPanel.canBecomeKey returns false by default, which prevents:
 //   - text fields from receiving keyboard focus (can't type tasks)
@@ -91,6 +98,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         applyActivationPolicy()
         setupMenuBar()
+
+        // Posted by the Settings gear button — the panel must close before
+        // the Settings window opens or its .popUpMenu level would cover it.
+        NotificationCenter.default.addObserver(
+            forName: .taskTetherHidePanel, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.hidePanel()
+        }
     }
 
     private func applyActivationPolicy() {

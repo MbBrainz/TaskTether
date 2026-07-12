@@ -3,7 +3,10 @@
 //  TaskTether
 //
 //  Created: 13/03/2026 · 18:10
-//  Updated: 01/04/2026
+//  Updated: 12/07/2026 — two layout paths sharing the same rows:
+//           macOS 13+ uses the native grouped Form (System Settings look);
+//           macOS 12 has no grouped form API and renders a plain columnar
+//           Form, so it gets a hand-built card layout instead.
 //
 
 import SwiftUI
@@ -23,10 +26,40 @@ struct SettingsView: View {
                     )
                 }
         }
-        .frame(width: 460, height: 620)
-        // Bring window to front when it opens
+        .frame(width: 500, height: 640)
+        // Grabs this view's own NSWindow and forces it to the front —
+        // reliable on every macOS version and every open path, unlike
+        // searching NSApp.windows by title.
+        .background(SettingsWindowLifter())
         .onAppear {
+            // Close the menu panel — its window level (.popUpMenu) sits
+            // above normal windows and would cover the Settings window.
+            NotificationCenter.default.post(name: .taskTetherHidePanel, object: nil)
             NSApp.activate(ignoringOtherApps: true)
+        }
+    }
+}
+
+// MARK: - SettingsWindowLifter
+// Accessory (no-Dock) apps may be refused activation on macOS 14+, leaving
+// the Settings window open but BEHIND other apps with nothing visible to
+// click. viewDidMoveToWindow guarantees a window reference, and
+// orderFrontRegardless works even when the app is not active.
+
+private struct SettingsWindowLifter: NSViewRepresentable {
+
+    func makeNSView(context: Context) -> LifterView { LifterView() }
+    func updateNSView(_ nsView: LifterView, context: Context) {}
+
+    final class LifterView: NSView {
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            guard let window else { return }
+            DispatchQueue.main.async {
+                NSApp.activate(ignoringOtherApps: true)
+                window.makeKeyAndOrderFront(nil)
+                window.orderFrontRegardless()
+            }
         }
     }
 }
@@ -40,6 +73,7 @@ private struct GeneralSettingsTab: View {
 
     @State private var themeLoadError: String?
     @State private var showingThemeError = false
+    @State private var showingRestartPrompt = false
 
     // Available app languages — system default + supported localisations
     private let supportedLanguages: [(id: String, name: String)] = [
@@ -49,11 +83,17 @@ private struct GeneralSettingsTab: View {
         ("ar",     "العربية"),
     ]
 
-    // Reads and writes the app language override stored in UserDefaults.
-    // Setting AppleLanguages forces the next launch to use the chosen language.
+    // The stored AppleLanguages override. macOS pre-fills AppleLanguages with
+    // the system language list (e.g. ["en-GB", "hu-HU"]) even when the app has
+    // never set an override — so only an exact match for one of our override
+    // ids counts. Anything else means "no override" and must display as
+    // System Default, not as a blank picker.
     @State private var selectedLanguage: String = {
-        let stored = UserDefaults.standard.array(forKey: "AppleLanguages") as? [String]
-        return stored?.first ?? "system"
+        guard let stored = UserDefaults.standard.array(forKey: "AppleLanguages") as? [String],
+              let first  = stored.first,
+              ["en", "hu", "ar"].contains(first)
+        else { return "system" }
+        return first
     }()
 
     // Reads and writes the dock visibility preference stored in UserDefaults.
@@ -68,143 +108,13 @@ private struct GeneralSettingsTab: View {
     }
 
     var body: some View {
-        Form {
-
-                // MARK: Theme
-                Section(String(localized: "settings.section.theme")) {
-                    Picker(
-                        String(localized: "settings.theme.light"),
-                        selection: deferred(\.lightThemeId)
-                    ) {
-                        ForEach(themeManager.availableThemes) { theme in
-                            Text(theme.name).tag(theme.id)
-                        }
-                    }
-
-                    Picker(
-                        String(localized: "settings.theme.dark"),
-                        selection: deferred(\.darkThemeId)
-                    ) {
-                        ForEach(themeManager.availableThemes) { theme in
-                            Text(theme.name).tag(theme.id)
-                        }
-                    }
-
-                    ThemeSwatchRow()
-                }
-
-                // MARK: Appearance
-                Section(String(localized: "settings.section.appearance")) {
-                    Picker(
-                        String(localized: "settings.appearance.label"),
-                        selection: deferred(\.appearanceOverride)
-                    ) {
-                        Text(String(localized: "settings.appearance.system")).tag("system")
-                        Text(String(localized: "settings.appearance.light")).tag("light")
-                        Text(String(localized: "settings.appearance.dark")).tag("dark")
-                    }
-                    .pickerStyle(.segmented)
-                }
-
-                // MARK: Language
-                Section(String(localized: "settings.section.language")) {
-                    Picker(
-                        String(localized: "settings.language.label"),
-                        selection: $selectedLanguage
-                    ) {
-                        ForEach(supportedLanguages, id: \.id) { lang in
-                            Text(lang.name).tag(lang.id)
-                        }
-                    }
-                    .onChange(of: selectedLanguage) { newValue in
-                        if newValue == "system" {
-                            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
-                        } else {
-                            UserDefaults.standard.set([newValue], forKey: "AppleLanguages")
-                        }
-                        UserDefaults.standard.synchronize()
-                    }
-
-                    Text(String(localized: "settings.language.restart_hint"))
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                }
-
-                // MARK: Dock
-                Section(String(localized: "settings.section.dock")) {
-                    Toggle(String(localized: "settings.dock.label"), isOn: $showInDock)
-                        .onChange(of: showInDock) { newValue in
-                            UserDefaults.standard.set(newValue, forKey: "showInDock")
-                        }
-
-                    Text(String(localized: "settings.dock.restart_hint"))
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                }
-
-                // MARK: Sync
-                Section(String(localized: "settings.section.sync")) {
-                    Picker(
-                        String(localized: "settings.sync.interval"),
-                        selection: deferred(\.syncInterval)
-                    ) {
-                        ForEach([5, 10, 15, 30, 60], id: \.self) { minutes in
-                            Text(
-                                String(
-                                    format: String(localized: "settings.sync.interval.minutes"),
-                                    minutes
-                                )
-                            )
-                            .tag(minutes)
-                        }
-                    }
-                }
-
-                // MARK: Custom Themes
-                Section(String(localized: "settings.section.customtheme")) {
-                    HStack {
-                        Text(String(localized: "settings.customtheme.description"))
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Button(String(localized: "settings.customtheme.load")) {
-                            loadCustomTheme()
-                        }
-                    }
-                }
-
-                // MARK: Account
-                Section(String(localized: "settings.section.account")) {
-                    HStack {
-                        Text(String(localized: "settings.account.google"))
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Button(String(localized: "settings.signout"), role: .destructive) {
-                            authManager.signOut()
-                        }
-                    }
-                }
-
-                // MARK: Support
-                Section(String(localized: "settings.section.support")) {
-                    HStack {
-                        Text(String(localized: "settings.support.description"))
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Link(destination: URL(string: "https://ko-fi.com/hazims")!) {
-                            Image("kofi_button")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 36)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
+        Group {
+            if #available(macOS 13, *) {
+                groupedForm
+            } else {
+                legacyCards
             }
-        .modifier(GroupedFormStyle())
-        .modifier(AlwaysScrollIndicators())
-        .padding(.vertical, 8)
+        }
         .alert(
             String(localized: "settings.customtheme.error.title"),
             isPresented: $showingThemeError,
@@ -214,6 +124,296 @@ private struct GeneralSettingsTab: View {
         } message: { error in
             Text(error)
         }
+    }
+
+    // MARK: Layout — macOS 13+ native grouped form
+
+    @available(macOS 13, *)
+    private var groupedForm: some View {
+        Form {
+            Section {
+                themeRows
+            } header: {
+                Text(String(localized: "settings.section.theme"))
+            }
+
+            Section {
+                appearanceRow
+            } header: {
+                Text(String(localized: "settings.section.appearance"))
+            }
+
+            Section {
+                languageRow
+            } header: {
+                Text(String(localized: "settings.section.language"))
+            } footer: {
+                SettingsFooterText(String(localized: "settings.language.restart_hint"))
+            }
+
+            Section {
+                dockRow
+            } header: {
+                Text(String(localized: "settings.section.dock"))
+            } footer: {
+                SettingsFooterText(String(localized: "settings.dock.restart_hint"))
+            }
+
+            Section {
+                syncRow
+            } header: {
+                Text(String(localized: "settings.section.sync"))
+            }
+
+            Section {
+                customThemeRow
+            } header: {
+                Text(String(localized: "settings.section.customtheme"))
+            }
+
+            Section {
+                accountRow
+            } header: {
+                Text(String(localized: "settings.section.account"))
+            }
+
+            Section {
+                aboutRow
+            } header: {
+                Text(String(localized: "settings.section.about"))
+            }
+
+            Section {
+                supportRow
+            } header: {
+                Text(String(localized: "settings.section.support"))
+            }
+        }
+        .formStyle(.grouped)
+        .modifier(AlwaysScrollIndicators())
+    }
+
+    // MARK: Layout — macOS 12 card fallback
+    // macOS 12 has no formStyle(.grouped); a plain Form renders the old
+    // columnar preferences layout with section titles as stray text rows.
+    // These hand-built cards give Monterey the same visual structure the
+    // grouped form gives newer systems.
+
+    private var legacyCards: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                LegacySection(title: String(localized: "settings.section.theme")) {
+                    themeRows
+                }
+                LegacySection(title: String(localized: "settings.section.appearance")) {
+                    appearanceRow
+                }
+                LegacySection(
+                    title:  String(localized: "settings.section.language"),
+                    footer: String(localized: "settings.language.restart_hint")
+                ) {
+                    languageRow
+                }
+                LegacySection(
+                    title:  String(localized: "settings.section.dock"),
+                    footer: String(localized: "settings.dock.restart_hint")
+                ) {
+                    dockRow
+                }
+                LegacySection(title: String(localized: "settings.section.sync")) {
+                    syncRow
+                }
+                LegacySection(title: String(localized: "settings.section.customtheme")) {
+                    customThemeRow
+                }
+                LegacySection(title: String(localized: "settings.section.account")) {
+                    accountRow
+                }
+                LegacySection(title: String(localized: "settings.section.about")) {
+                    aboutRow
+                }
+                LegacySection(title: String(localized: "settings.section.support")) {
+                    supportRow
+                }
+            }
+            .padding(16)
+        }
+    }
+
+    // MARK: Rows — shared by both layouts
+
+    @ViewBuilder
+    private var themeRows: some View {
+        Picker(
+            String(localized: "settings.theme.light"),
+            selection: deferred(\.lightThemeId)
+        ) {
+            ForEach(themeManager.availableThemes) { theme in
+                Text(theme.name).tag(theme.id)
+            }
+        }
+
+        Picker(
+            String(localized: "settings.theme.dark"),
+            selection: deferred(\.darkThemeId)
+        ) {
+            ForEach(themeManager.availableThemes) { theme in
+                Text(theme.name).tag(theme.id)
+            }
+        }
+
+        ThemeSwatchRow()
+    }
+
+    // The section header names the setting, so the picker's own label is
+    // hidden — a visible "Mode" label crammed next to three segments is
+    // what made this row feel cluttered.
+    private var appearanceRow: some View {
+        Picker(
+            String(localized: "settings.appearance.label"),
+            selection: deferred(\.appearanceOverride)
+        ) {
+            Text(String(localized: "settings.appearance.system")).tag("system")
+            Text(String(localized: "settings.appearance.light")).tag("light")
+            Text(String(localized: "settings.appearance.dark")).tag("dark")
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+    }
+
+    private var languageRow: some View {
+        Picker(
+            String(localized: "settings.language.label"),
+            selection: $selectedLanguage
+        ) {
+            ForEach(supportedLanguages, id: \.id) { lang in
+                Text(lang.name).tag(lang.id)
+            }
+        }
+        .onChange(of: selectedLanguage) { newValue in
+            if newValue == "system" {
+                UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+            } else {
+                UserDefaults.standard.set([newValue], forKey: "AppleLanguages")
+            }
+            UserDefaults.standard.synchronize()
+            // The language is only read at process launch, and a menu bar
+            // app gives no visible cue that it is still running — so offer
+            // the relaunch instead of hoping the user finds Quit.
+            showingRestartPrompt = true
+        }
+        .alert(
+            String(localized: "settings.language.restart.title"),
+            isPresented: $showingRestartPrompt
+        ) {
+            Button(String(localized: "settings.language.restart.now")) {
+                relaunchApp()
+            }
+            Button(String(localized: "settings.language.restart.later"), role: .cancel) {}
+        } message: {
+            Text(String(localized: "settings.language.restart.message"))
+        }
+    }
+
+    // Launches a fresh instance of the app, then terminates this one.
+    private func relaunchApp() {
+        let config = NSWorkspace.OpenConfiguration()
+        config.createsNewApplicationInstance = true
+        NSWorkspace.shared.openApplication(
+            at: Bundle.main.bundleURL,
+            configuration: config
+        ) { _, _ in
+            DispatchQueue.main.async {
+                NSApp.terminate(nil)
+            }
+        }
+    }
+
+    private var dockRow: some View {
+        Toggle(String(localized: "settings.dock.label"), isOn: $showInDock)
+            .onChange(of: showInDock) { newValue in
+                UserDefaults.standard.set(newValue, forKey: "showInDock")
+            }
+    }
+
+    private var syncRow: some View {
+        Picker(
+            String(localized: "settings.sync.interval"),
+            selection: deferred(\.syncInterval)
+        ) {
+            ForEach([5, 10, 15, 30, 60], id: \.self) { minutes in
+                Text(
+                    String(
+                        format: String(localized: "settings.sync.interval.minutes"),
+                        minutes
+                    )
+                )
+                .tag(minutes)
+            }
+        }
+    }
+
+    private var customThemeRow: some View {
+        HStack(alignment: .center) {
+            Text(String(localized: "settings.customtheme.description"))
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button(String(localized: "settings.customtheme.load")) {
+                loadCustomTheme()
+            }
+        }
+    }
+
+    private var accountRow: some View {
+        HStack {
+            Text(String(localized: "settings.account.google"))
+            Spacer()
+            Button(String(localized: "settings.signout"), role: .destructive) {
+                authManager.signOut()
+            }
+        }
+    }
+
+    // Version is read live from the bundle (set by MARKETING_VERSION and
+    // CURRENT_PROJECT_VERSION in the Xcode project) so what the user sees
+    // can never drift from what was actually built.
+    private var aboutRow: some View {
+        HStack {
+            Text(String(localized: "settings.about.version"))
+            Spacer()
+            Text(appVersionText)
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+        }
+    }
+
+    private var supportRow: some View {
+        HStack(alignment: .center) {
+            Text(String(localized: "settings.support.description"))
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Link(destination: URL(string: "https://ko-fi.com/hazims")!) {
+                Image("kofi_button")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 32)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: Helpers
+
+    // "1.1.0 (4)" — marketing version plus build number from the bundle.
+    private var appVersionText: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+        let build   = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
+        return "\(version) (\(build))"
     }
 
     private func loadCustomTheme() {
@@ -229,6 +429,64 @@ private struct GeneralSettingsTab: View {
             themeLoadError    = error
             showingThemeError = true
         }
+    }
+}
+
+// MARK: - LegacySection
+// Card-style section for the macOS 12 layout: uppercase header, rounded
+// card around the rows, optional footer hint below.
+
+private struct LegacySection<Content: View>: View {
+
+    let title:  String
+    var footer: String? = nil
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.system(size: 11, weight: .semibold))
+                .textCase(.uppercase)
+                .foregroundStyle(.secondary)
+                .padding(.leading, 2)
+
+            VStack(alignment: .leading, spacing: 10) {
+                content
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(nsColor: .controlBackgroundColor))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+            )
+
+            if let footer {
+                Text(footer)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, 2)
+            }
+        }
+    }
+}
+
+// MARK: - SettingsFooterText
+// Footer hint styling for the grouped form path.
+
+private struct SettingsFooterText: View {
+    private let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 11))
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -266,20 +524,6 @@ private struct ThemeSwatchRow: View {
         ("Text",    themeManager.textPrimary),
         ("Spark",   themeManager.sparkline)
     ]}
-}
-
-// MARK: - GroupedFormStyle
-// .formStyle(.grouped) requires macOS 13+. On macOS 12, Form already renders
-// in a grouped style by default, so the modifier is a no-op fallback.
-
-private struct GroupedFormStyle: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(macOS 13, *) {
-            content.formStyle(.grouped)
-        } else {
-            content
-        }
-    }
 }
 
 // MARK: - AlwaysScrollIndicators
