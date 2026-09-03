@@ -52,7 +52,9 @@ TaskTether runs as a menu bar app on your Mac. On a configurable interval it com
 
 ## Installation
 
-TaskTether is currently available as source only. See [Building from source](#building-from-source) below.
+**Pre-built binary** (from a teammate or GitHub Releases) — unzip, drag `TaskTether.app` to `/Applications`, then right-click it and choose **Open** the first time. The app isn't notarised, so Gatekeeper will otherwise refuse to launch it; right-click → Open (or **System Settings → Privacy & Security → Open Anyway**) is a one-time step.
+
+**Building from source** — see [Building from source](#building-from-source) below.
 
 ---
 
@@ -80,21 +82,16 @@ When prompted for application type, choose **Desktop app** and name it `TaskTeth
 2. Open `Contents → Resources`
 3. Copy `GoogleCredentials.json` into that folder
 
-### Step 4 — Add your redirect URI
+> No redirect URI registration needed — TaskTether is a Desktop app OAuth client, so Google accepts any loopback address. TaskTether picks a free `localhost` port automatically each time it signs in.
 
-1. Back in Google Cloud Console, go to **APIs & Services → Credentials**
-2. Click on your OAuth 2.0 Client ID to open it
-3. Under **Authorised redirect URIs**, click **+ Add URI**
-4. Enter `http://localhost:8080` → **Save**
-
-### Step 5 — Connect your account
+### Step 4 — Connect your account
 
 1. Open TaskTether from the menu bar
 2. Click **Connect Google Account**
 3. Your browser opens — sign in and click Allow
 4. TaskTether is now connected and will start syncing
 
-### Step 6 — Grant Reminders access
+### Step 5 — Grant Reminders access
 
 The first time TaskTether accesses Reminders, macOS will ask for permission. Click **Allow**.
 
@@ -115,6 +112,19 @@ cd TaskTether
 4. Press **Cmd+R** to build and run
 
 Requires Xcode 15 or later.
+
+### Building a distributable .zip
+
+`scripts/build-release.sh` builds, signs, and zips the app for sharing:
+
+```bash
+scripts/build-release.sh --credentials /path/to/GoogleCredentials.json
+```
+
+The signed app lands in `dist/TaskTether-<version>.zip`. It's signed with an Apple Development certificate, not notarised — recipients still need the right-click → Open step above.
+
+- `--credentials <path>` bakes `GoogleCredentials.json` into the app bundle before signing, so the recipient can skip the Google Cloud setup entirely. This is the recommended way to share a build with a teammate. Everyone using that build shares one OAuth client, which is fine for a small team — each person still signs in with their own Google account.
+- `--adhoc` signs ad-hoc instead, for building on a machine without the team's signing certificate.
 
 ---
 

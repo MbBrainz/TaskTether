@@ -4,6 +4,28 @@ All notable changes to TaskTether are documented here.
 
 ---
 
+## [1.1.0] — 2026-09-03
+
+### Security
+- **OAuth sign-in listener bound to localhost only** — the local server used during Google sign-in previously listened on all interfaces, making it reachable from other devices on the LAN during sign-in. It now binds to 127.0.0.1 only.
+- **OAuth flow hardened with a state nonce and PKCE** — each sign-in attempt now generates a unique `state` value and a PKCE challenge (S256); callbacks with a missing or mismatched state are rejected, and the redirect URI is now `http://127.0.0.1:<port>`.
+- **Local OAuth callback server hardened against malformed requests** — requests are now parsed strictly, with malformed or non-GET requests returning 400. Google's `error=access_denied` response is now handled directly, so a cancelled sign-in no longer spins forever, and connections are always closed.
+- **Google Tasks API URLs built safely** — request URLs are now built with `URLComponents` and percent-encoded IDs instead of force-unwrapped string interpolation, removing a crash risk.
+
+### Fixed
+- **Empty Reminders fetch no longer risks deleting Google Tasks** — the sync engine now treats an empty Reminders fetch as suspicious for one cycle, mirroring the existing guard on the Google side, so a transient EventKit or permissions glitch can no longer delete tasks in Google Tasks.
+
+### Added
+- **Overdue task indicator** — incomplete tasks past their due date now appear above today's tasks with a warning icon.
+- **Menu bar badge** — shows the number of incomplete tasks (Settings → Menu Bar toggle, on by default).
+- **Sync failure notification** — a macOS notification appears when sync fails three times in a row, and periodically thereafter while it keeps failing.
+- **`scripts/build-release.sh`** — builds a signed (not notarised) distributable .zip into `dist/`, optionally baking in `GoogleCredentials.json` (`--credentials`) or ad-hoc signing (`--adhoc`).
+
+### Changed
+- **README cleanup** — removed the stale step to register a `http://localhost:8080` redirect URI (the app now picks a free loopback port automatically); added binary installation and Gatekeeper instructions.
+
+---
+
 ## [1.0.3] — 2026-05-05
 
 ### Fixed

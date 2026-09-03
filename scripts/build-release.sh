@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+#
+# build-release.sh — build a distributable Release .app + .zip of TaskTether
+# for direct sharing (owner + colleague). No notarisation, no App Store.
+#
+# Usage:
+#   scripts/build-release.sh [--credentials <path>] [--team <TEAMID>] [--adhoc] [--out <dir>]
+#
+#   --credentials <path>  Copy this file in as GoogleCredentials.json inside
+#                          the built app's Contents/Resources before signing.
+#   --team <TEAMID>       Development team to sign with (default: CRFB3K8FGK,
+#                          overridable via the DEVELOPMENT_TEAM env var).
+#                          Ignored when --adhoc is passed.
+#   --adhoc                Sign with the ad-hoc identity "-" instead of a
+#                          team identity. Use on machines without the cert.
+#   --out <dir>            Output directory for the zip (default: dist/).
+#
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Argument parsing
+# ---------------------------------------------------------------------------
+CREDENTIALS=""
+TEAM="${DEVELOPMENT_TEAM:-CRFB3K8FGK}"
+ADHOC=0
+OUT_DIR_ARG="dist"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --credentials)
+      CREDENTIALS="$2"; shift 2 ;;
+    --team)
+      TEAM="$2"; shift 2 ;;
+    --adhoc)
+      ADHOC=1; shift ;;
+    --out)
+      OUT_DIR_ARG="$2"; shift 2 ;;
+    -h|--help)
+      grep '^#' "$0" | sed 's/^#//'; exit 0 ;;
+    *)
+      echo "error: unknown argument: $1" >&2; exit 1 ;;
+  esac
+done
+
+if [[ -n "$CREDENTIALS" && ! -f "$CREDENTIALS" ]]; then
+  echo "error: --credentials file not found: $CREDENTIALS" >&2
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+XCODEPROJ="$ROOT_DIR/TaskTether/TaskTether.xcodeproj"
+ENTITLEMENTS="$ROOT_DIR/TaskTether/TaskTether/TaskTether.entitlements"
+
+mkdir -p "$OUT_DIR_ARG"
+OUT_DIR="$(cd "$OUT_DIR_ARG" && pwd)"
+DERIVED_DATA="$OUT_DIR/.build/DerivedData"
+rm -rf "$DERIVED_DATA"
+
+echo "==> Project:      $XCODEPROJ"
+echo "==> Entitlements:  $ENTITLEMENTS"
+echo "==> Output dir:    $OUT_DIR"
+echo "==> Mode:          $([[ $ADHOC -eq 1 ]] && echo "ad-hoc (identity: -)" || echo "team ($TEAM)")"
+
+# ---------------------------------------------------------------------------
+# Build
+# ---------------------------------------------------------------------------
+BUILD_ARGS=(
+  -project "$XCODEPROJ"
+  -scheme TaskTether
+  -configuration Release
+  -derivedDataPath "$DERIVED_DATA"
+  build
+)
+
+if [[ $ADHOC -eq 1 ]]; then
+  BUILD_ARGS+=(
+    CODE_SIGN_IDENTITY=-
+    CODE_SIGN_STYLE=Manual
+    DEVELOPMENT_TEAM=""
+    ENABLE_HARDENED_RUNTIME=NO
+  )
+else
+  # Manual signing with the locally installed certificate. Automatic signing
+  # (CODE_SIGN_STYLE=Automatic + -allowProvisioningUpdates) requires Xcode to
+  # log in to an Apple ID to refresh provisioning, which fails headlessly on
+  # machines without an interactive signed-in account. Since a valid identity
+  # for this team already lives in the keychain, sign with it directly.
+  #
+  # Passing the generic category name "Apple Development" to xcodebuild's
+  # CODE_SIGN_IDENTITY fails ("No signing certificate 'Mac Development'
+  # found") even when a matching cert exists — xcodebuild's manual-signing
+  # resolution wants an exact identity. The SHA-1 hash always resolves.
+  BUILD_IDENTITY_HASH="$(security find-identity -v -p codesigning | grep "$TEAM" | head -1 | awk '{print $2}')"
+  if [[ -z "$BUILD_IDENTITY_HASH" ]]; then
+    echo "error: no codesigning identity found for team $TEAM in keychain" >&2
+    echo "       run: security find-identity -v -p codesigning" >&2
+    exit 1
+  fi
+  BUILD_ARGS+=(
+    DEVELOPMENT_TEAM="$TEAM"
+    CODE_SIGN_STYLE=Manual
+    CODE_SIGN_IDENTITY="$BUILD_IDENTITY_HASH"
+    ENABLE_HARDENED_RUNTIME=YES
+  )
+fi
+
+
+echo "==> Running: xcodebuild ${BUILD_ARGS[*]}"
+xcodebuild "${BUILD_ARGS[@]}"
+
+APP_PATH="$DERIVED_DATA/Build/Products/Release/TaskTether.app"
+if [[ ! -d "$APP_PATH" ]]; then
+  echo "error: build did not produce $APP_PATH" >&2
+  exit 1
+fi
+echo "==> Built app: $APP_PATH"
+
+# ---------------------------------------------------------------------------
+# Optional: inject GoogleCredentials.json and re-sign
+# ---------------------------------------------------------------------------
+if [[ -n "$CREDENTIALS" ]]; then
+  echo "==> Injecting credentials from $CREDENTIALS"
+  cp "$CREDENTIALS" "$APP_PATH/Contents/Resources/GoogleCredentials.json"
+
+  if [[ $ADHOC -eq 1 ]]; then
+    IDENTITY="-"
+    RESIGN_ARGS=(--force --deep --sign "$IDENTITY" --entitlements "$ENTITLEMENTS" "$APP_PATH")
+  else
+    IDENTITY="$(security find-identity -v -p codesigning | grep "$TEAM" | head -1 | awk -F'"' '{print $2}')"
+    if [[ -z "$IDENTITY" ]]; then
+      echo "error: no codesigning identity found for team $TEAM in keychain" >&2
+      echo "       run: security find-identity -v -p codesigning" >&2
+      exit 1
+    fi
+    RESIGN_ARGS=(--force --deep --options runtime --sign "$IDENTITY" --entitlements "$ENTITLEMENTS" "$APP_PATH")
+  fi
+
+  echo "==> Re-signing with identity: $IDENTITY"
+  if ! codesign "${RESIGN_ARGS[@]}"; then
+    if [[ $ADHOC -eq 0 ]]; then
+      echo "==> Re-sign with hardened runtime failed, retrying without --options runtime"
+      codesign --force --deep --sign "$IDENTITY" --entitlements "$ENTITLEMENTS" "$APP_PATH"
+    else
+      exit 1
+    fi
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# Verification (fail loudly on real problems; spctl rejection is expected)
+# ---------------------------------------------------------------------------
+echo "==> Verifying signature (codesign --verify --deep --strict)"
+if ! codesign --verify --deep --strict --verbose=2 "$APP_PATH"; then
+  echo "error: codesign verification FAILED" >&2
+  exit 1
+fi
+echo "==> Signature OK"
+
+echo "==> codesign -dv --verbose=2 output:"
+codesign -dv --verbose=2 "$APP_PATH" 2>&1 || true
+
+echo "==> spctl --assess (expected to REJECT — app is not notarised):"
+set +e
+spctl --assess --type execute --verbose=2 "$APP_PATH" 2>&1
+SPCTL_STATUS=$?
+set -e
+if [[ $SPCTL_STATUS -eq 0 ]]; then
+  echo "==> NOTE: spctl accepted the app (unexpected but not a failure)."
+else
+  echo "==> spctl rejected as expected (not notarised, status=$SPCTL_STATUS)."
+fi
+
+# ---------------------------------------------------------------------------
+# Package
+# ---------------------------------------------------------------------------
+VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PATH/Contents/Info.plist")"
+ZIP_NAME="TaskTether-${VERSION}.zip"
+ZIP_PATH="$OUT_DIR/$ZIP_NAME"
+rm -f "$ZIP_PATH"
+
+echo "==> Packaging $ZIP_NAME"
+ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
+
+ZIP_SIZE="$(du -h "$ZIP_PATH" | cut -f1)"
+ZIP_SHA="$(shasum -a 256 "$ZIP_PATH" | awk '{print $1}')"
+
+echo ""
+echo "=================================================================="
+echo " Build complete"
+echo "=================================================================="
+echo " Zip:    $ZIP_PATH"
+echo " Size:   $ZIP_SIZE"
+echo " SHA256: $ZIP_SHA"
+echo ""
+echo " Recipient instructions:"
+echo "   1. Unzip TaskTether-${VERSION}.zip"
+echo "   2. Move TaskTether.app to /Applications"
+echo "   3. First launch: right-click (or Control-click) TaskTether.app and"
+echo "      choose Open, then confirm in the Gatekeeper dialog — this app is"
+echo "      not notarised, so a plain double-click will be blocked the first time."
+echo "   4. If GoogleCredentials.json was not baked in, add it yourself:"
+echo "      right-click TaskTether.app -> Show Package Contents ->"
+echo "      Contents/Resources/ -> drop in GoogleCredentials.json."
+echo "=================================================================="
