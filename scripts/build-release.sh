@@ -74,6 +74,9 @@ BUILD_ARGS=(
   -configuration Release
   -derivedDataPath "$DERIVED_DATA"
   build
+  # Universal binary so the same zip runs on Intel and Apple Silicon Macs.
+  ARCHS="arm64 x86_64"
+  ONLY_ACTIVE_ARCH=NO
 )
 
 if [[ $ADHOC -eq 1 ]]; then
