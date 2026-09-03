@@ -37,6 +37,7 @@ class SyncEngine: ObservableObject {
     let idStore:                    IDStore       = IDStore()
     let statsStore:                 StatsStore    = StatsStore()
     private let snapshotStore:      SnapshotStore = SnapshotStore()
+    private let failureNotifier:    SyncFailureNotifier = SyncFailureNotifier()
 
     // MARK: - Internal State
 
@@ -59,6 +60,7 @@ class SyncEngine: ObservableObject {
     private var remindersDeleteCandidates: Set<String> = []  // remindersIds
     private var googleDeleteCandidates:    Set<String> = []  // googleIds
     private var consecutiveGoogleZero:     Int          = 0  // consecutive cycles with 0 Google tasks
+    private var consecutiveRemindersZero:  Int          = 0  // consecutive cycles with 0 Reminders tasks
 
     // MARK: - Init
 
@@ -79,6 +81,15 @@ class SyncEngine: ObservableObject {
         let restored          = snapshotStore.load()
         self.previousSnapshot = restored ?? []
         self.lastSyncAt       = snapshotStore.lastSyncAt
+
+        // Seed the published list from the persisted baseline so the menu
+        // bar badge and task list show immediately on cold launch, instead
+        // of sitting blank until the first sync round-trip completes. Plain
+        // assignment only — no stats recording, no persistBaseline() call.
+        // The subsequent sync() reconciles as before and can revise this.
+        if let restored {
+            self.tasks = sortedByOrder(restored)
+        }
 
         // Reconciliation is required when there is no baseline at all, or
         // the last sync is older than the gap threshold. In either case the
@@ -231,6 +242,7 @@ class SyncEngine: ObservableObject {
             previousSnapshot = tasks
             lastSyncAt       = Date()
             state            = .idle
+            failureNotifier.recordSuccess()
             persistBaseline()
             // A fresh baseline now exists — normal diffing (including
             // deletion detection) is safe from the next cycle onwards.
@@ -248,6 +260,7 @@ class SyncEngine: ObservableObject {
 
         } catch {
             state = .error(error.localizedDescription)
+            failureNotifier.recordFailure(error.localizedDescription)
         }
 
         isSyncing = false
@@ -324,6 +337,26 @@ class SyncEngine: ObservableObject {
             #endif
         }
 
+        // Symmetric safety valve: Reminders returning 0 items could be a
+        // transient EventKit glitch (authorisation flicker, TaskTether list
+        // momentarily missing) rather than the user deleting everything.
+        // RemindersManager.fetchTasks() never throws — every failure mode
+        // (stale isAuthorised, list not found) surfaces as an empty array,
+        // so an empty fetch is the only signal we have and must be treated
+        // the same way a Google zero-fetch is.
+        if remindersTasks.isEmpty {
+            consecutiveRemindersZero += 1
+        } else {
+            consecutiveRemindersZero = 0
+        }
+        let remindersSuspicious = remindersTasks.isEmpty && prevHadTasks && consecutiveRemindersZero < 2
+
+        if remindersSuspicious {
+            #if DEBUG
+            print("SyncEngine: Reminders returned 0 tasks (cycle \(consecutiveRemindersZero)/2) — skipping deletions")
+            #endif
+        }
+
         // Track which Google IDs are handled in the Reminders loop
         // so the Google loop only processes unlinked tasks.
         var processedGids = Set<String>()
@@ -393,7 +426,17 @@ class SyncEngine: ObservableObject {
             guard let gid = gTask.googleTasksId else { continue }
             if processedGids.contains(gid) { continue }  // Already handled above
             if let rid = idStore.remindersId(for: gid) {
-                if remindersByRid[rid] == nil {
+                if remindersByRid[rid] == nil && !remindersSuspicious {
+                    // remindersSuspicious guards this whole branch, and is deliberately
+                    // STRICTER than googleSuspicious above: googleSuspicious only gates
+                    // firing an already-confirmed delete candidate, but here a suspicious
+                    // cycle also blocks adding new delete candidates AND blocks the
+                    // completed-task immediate-delete bypass. Rationale: when Reminders
+                    // just returned 0 items and the previous baseline had tasks, a
+                    // "missing" reminder here is indistinguishable from a transient
+                    // EventKit glitch — data safety wins over parity with the Google
+                    // side. Consequence: a genuine "all reminders deleted" takes 3
+                    // cycles to propagate to Google instead of 2.
                     if googleDeleteCandidates.contains(gid) {
                         // Already a candidate — fire deletion regardless of snapshot.
                         diff.deleteFromGoogle.append(gid)
@@ -699,21 +742,10 @@ class SyncEngine: ObservableObject {
 
     // MARK: - Date Helper
 
-    // Returns noon UTC for the LOCAL calendar date of the given time.
-    // Critical: must use the LOCAL calendar to extract year/month/day,
-    // not UTC — otherwise tasks appear on the wrong day for users east of UTC.
-    // Example: 00:30 Budapest (UTC+1) = 23:30 UTC previous day.
-    // UTC calendar gives yesterday; local calendar correctly gives today.
+    // Forwards to the single source of truth on TetherTask so SyncEngine and
+    // the display model can never drift apart on what "today" means.
     private func noonUTC(for date: Date = Date()) -> Date {
-        // Extract date components in the user's local timezone
-        let local = Calendar.current.dateComponents([.year, .month, .day], from: date)
-        // Store as noon UTC for consistent cross-platform comparison
-        var utcCal = Calendar(identifier: .gregorian)
-        utcCal.timeZone = TimeZone(identifier: "UTC")!
-        return utcCal.date(from: DateComponents(
-            timeZone: TimeZone(identifier: "UTC"),
-            year: local.year, month: local.month, day: local.day, hour: 12
-        )) ?? date
+        TetherTask.noonUTC(for: date)
     }
 
     // Schedules a sync at the next local midnight so todayTasks re-evaluates
@@ -886,6 +918,17 @@ class SyncEngine: ObservableObject {
             // Overdue incomplete tasks are excluded (they are in the past).
             return due >= todayNoon && due < tomorrow
         }
+    }
+
+    // Incomplete tasks whose due date is before today's noon-UTC boundary.
+    // Completed tasks are never overdue regardless of their original due
+    // date. `tasks` is already kept sorted (sortedByOrder runs after every
+    // mutation), so filtering it preserves that order without re-sorting —
+    // same pattern as todayTasks above. Intentionally excluded from stats:
+    // only todayTasks feeds StatsStore, so surfacing these here does not
+    // affect the productivity score.
+    var overdueTasks: [TetherTask] {
+        tasks.filter { $0.isOverdue }
     }
 
     // MARK: - Last Sync Text

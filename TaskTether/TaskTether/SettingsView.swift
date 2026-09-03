@@ -100,6 +100,12 @@ private struct GeneralSettingsTab: View {
     // Applied on next launch via NSApp.setActivationPolicy in TaskTetherApp.init().
     @State private var showInDock: Bool = UserDefaults.standard.bool(forKey: "showInDock")
 
+    // Reads and writes the menu bar badge preference stored in UserDefaults.
+    // Defaults to true (shown) when the key has never been set — unlike
+    // showInDock above, which defaults to false.
+    @State private var showMenuBarBadge: Bool =
+        UserDefaults.standard.object(forKey: "showMenuBarBadge") as? Bool ?? true
+
     private func deferred<T>(_ keyPath: ReferenceWritableKeyPath<ThemeManager, T>) -> Binding<T> {
         Binding(
             get: { themeManager[keyPath: keyPath] },
@@ -157,6 +163,12 @@ private struct GeneralSettingsTab: View {
                 Text(String(localized: "settings.section.dock"))
             } footer: {
                 SettingsFooterText(String(localized: "settings.dock.restart_hint"))
+            }
+
+            Section {
+                badgeRow
+            } header: {
+                Text(String(localized: "settings.section.badge"))
             }
 
             Section {
@@ -219,6 +231,9 @@ private struct GeneralSettingsTab: View {
                     footer: String(localized: "settings.dock.restart_hint")
                 ) {
                     dockRow
+                }
+                LegacySection(title: String(localized: "settings.section.badge")) {
+                    badgeRow
                 }
                 LegacySection(title: String(localized: "settings.section.sync")) {
                     syncRow
@@ -333,6 +348,16 @@ private struct GeneralSettingsTab: View {
         Toggle(String(localized: "settings.dock.label"), isOn: $showInDock)
             .onChange(of: showInDock) { newValue in
                 UserDefaults.standard.set(newValue, forKey: "showInDock")
+            }
+    }
+
+    // Takes effect immediately — onChange notifies the AppDelegate, which
+    // recomputes the badge without needing a relaunch.
+    private var badgeRow: some View {
+        Toggle(String(localized: "settings.badge.label"), isOn: $showMenuBarBadge)
+            .onChange(of: showMenuBarBadge) { newValue in
+                UserDefaults.standard.set(newValue, forKey: "showMenuBarBadge")
+                NotificationCenter.default.post(name: .taskTetherBadgeSettingChanged, object: nil)
             }
     }
 

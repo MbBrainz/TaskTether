@@ -558,6 +558,28 @@
         }
       }
     },
+    "notification.syncFailed.title": {
+      "comment": "Title of the macOS notification shown when sync has failed repeatedly.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TaskTether can't sync"
+          }
+        }
+      }
+    },
+    "notification.syncFailed.body": {
+      "comment": "Body of the macOS notification shown when sync has failed repeatedly. %@ is replaced with the underlying error description.",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TaskTether hasn't been able to sync: %@"
+          }
+        }
+      }
+    },
     "service.googletasks": {
       "comment": "Label next to the Google Tasks status dot in the main view.",
       "localizations": {
@@ -1483,6 +1505,18 @@
         }
       }
     },
+    "task.overdue": {
+      "comment": "Accessibility label for the overdue indicator shown on a task row whose due date has passed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overdue"
+          }
+        }
+      }
+    },
     "task.tomorrow.hint": {
       "extractionState": "manual",
       "localizations": {
@@ -1897,6 +1931,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Később"
+          }
+        }
+      }
+    },
+    "settings.badge.label": {
+      "comment": "Toggle label in the Menu Bar Badge section of Settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show task count in menu bar"
+          }
+        }
+      }
+    },
+    "settings.section.badge": {
+      "comment": "Section header in Settings for the menu bar badge toggle.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menu Bar"
           }
         }
       }

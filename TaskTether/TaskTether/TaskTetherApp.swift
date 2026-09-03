@@ -12,6 +12,7 @@
 
 import SwiftUI
 import AppKit
+import Combine
 
 // MARK: - App Entry Point
 
@@ -37,6 +38,9 @@ struct TaskTetherApp: App {
 extension Notification.Name {
     // Requests the AppDelegate to close the menu bar panel.
     static let taskTetherHidePanel = Notification.Name("taskTetherHidePanel")
+    // Posted by the Settings badge toggle so the AppDelegate refreshes the
+    // menu bar item immediately instead of waiting for the next task sync.
+    static let taskTetherBadgeSettingChanged = Notification.Name("taskTetherBadgeSettingChanged")
 }
 
 // MARK: - KeyablePanel
@@ -64,6 +68,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var statusItem:   NSStatusItem?
     private var panel:        NSPanel?
     private var eventMonitor: Any?
+    private var badgeCancellable: AnyCancellable?
 
     // Screen-space anchor: right edge of the status item button and the
     // bottom edge of the menu bar. These are stored when the panel first
@@ -98,6 +103,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         applyActivationPolicy()
         setupMenuBar()
+        setupBadge()
 
         // Posted by the Settings gear button — the panel must close before
         // the Settings window opens or its .popUpMenu level would cover it.
@@ -163,6 +169,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         p.contentView?.layer?.masksToBounds = true
 
         panel = p
+    }
+
+    // MARK: - Menu Bar Badge
+
+    // Subscribes to task changes and the Settings toggle so the badge stays
+    // current without waiting for the panel to be opened.
+    private func setupBadge() {
+        badgeCancellable = syncEngine.$tasks
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateBadge() }
+
+        NotificationCenter.default.addObserver(
+            forName: .taskTetherBadgeSettingChanged, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.updateBadge()
+        }
+
+        updateBadge()
+    }
+
+    // Shows the count of incomplete top-level tasks next to the status item
+    // icon, matching what the main task list displays (subtasks excluded).
+    private func updateBadge() {
+        guard let button = statusItem?.button else { return }
+
+        let enabled = UserDefaults.standard.object(forKey: "showMenuBarBadge") as? Bool ?? true
+        let count = syncEngine.tasks.filter { !$0.isCompleted && $0.parentGoogleId == nil }.count
+
+        button.imagePosition = .imageLeading
+        button.title = (enabled && count > 0) ? " \(count)" : ""
+        statusItem?.length = button.title.isEmpty
+            ? NSStatusItem.squareLength
+            : NSStatusItem.variableLength
     }
 
     // MARK: - Toggle

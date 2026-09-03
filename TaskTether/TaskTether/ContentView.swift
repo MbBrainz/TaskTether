@@ -270,8 +270,14 @@ struct MainContainerView: View {
 
     // MARK: - Live Task State
 
+    // Overdue tasks are shown above today's tasks. This list is display-only
+    // — StatsStore is fed exclusively from todayTasks (see SyncEngine.sync()),
+    // so widening what's shown here does not touch the productivity score.
+    // TodayView's empty state keys off this same array, so it now stays
+    // hidden until BOTH overdue and today's tasks are empty, which is the
+    // correct combined empty state.
     private var tasks: [TetherTaskItem] {
-        syncEngine.todayTasks.map { $0.toDisplayItem() }
+        (syncEngine.overdueTasks + syncEngine.todayTasks).map { $0.toDisplayItem() }
     }
 
 
