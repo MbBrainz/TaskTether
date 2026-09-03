@@ -20,6 +20,7 @@ All notable changes to TaskTether are documented here.
 - **Menu bar badge** — shows the number of incomplete tasks (Settings → Menu Bar toggle, on by default).
 - **Sync failure notification** — a macOS notification appears when sync fails three times in a row, and periodically thereafter while it keeps failing.
 - **`scripts/build-release.sh`** — builds a signed (not notarised) distributable .zip into `dist/`, optionally baking in `GoogleCredentials.json` (`--credentials`) or ad-hoc signing (`--adhoc`).
+- **DMG packaging** — `scripts/build-release.sh` now also produces a signed, classic drag-to-Applications `.dmg` alongside the `.zip` (skip with `--no-dmg`).
 
 ### Changed
 - **README cleanup** — removed the stale step to register a `http://localhost:8080` redirect URI (the app now picks a free loopback port automatically); added binary installation and Gatekeeper instructions.

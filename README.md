@@ -52,7 +52,7 @@ TaskTether runs as a menu bar app on your Mac. On a configurable interval it com
 
 ## Installation
 
-**Pre-built binary** (from a teammate or GitHub Releases) — unzip, drag `TaskTether.app` to `/Applications`, then right-click it and choose **Open** the first time. The app isn't notarised, so Gatekeeper will otherwise refuse to launch it; right-click → Open (or **System Settings → Privacy & Security → Open Anyway**) is a one-time step.
+**Pre-built binary** (from a teammate or GitHub Releases) — open the `.dmg`, drag `TaskTether.app` onto the `Applications` shortcut, then eject the disk image. On first launch, right-click (or Control-click) `TaskTether.app` in `/Applications` and choose **Open**. The app isn't notarised, so Gatekeeper will otherwise refuse to launch it; right-click → Open (or **System Settings → Privacy & Security → Open Anyway**) is a one-time step. If you were given a `.zip` instead, unzip it and drag `TaskTether.app` to `/Applications` before following the same first-launch step.
 
 **Building from source** — see [Building from source](#building-from-source) below.
 
@@ -115,16 +115,17 @@ Requires Xcode 15 or later.
 
 ### Building a distributable .zip
 
-`scripts/build-release.sh` builds, signs, and zips the app for sharing:
+`scripts/build-release.sh` builds, signs, and packages the app for sharing:
 
 ```bash
 scripts/build-release.sh --credentials /path/to/GoogleCredentials.json
 ```
 
-The signed app lands in `dist/TaskTether-<version>.zip`. It's signed with an Apple Development certificate, not notarised — recipients still need the right-click → Open step above.
+The signed app lands in both `dist/TaskTether-<version>.dmg` (a classic drag-to-Applications disk image — recommended) and `dist/TaskTether-<version>.zip`. Both are signed with an Apple Development certificate, not notarised — recipients still need the right-click → Open step above.
 
 - `--credentials <path>` bakes `GoogleCredentials.json` into the app bundle before signing, so the recipient can skip the Google Cloud setup entirely. This is the recommended way to share a build with a teammate. Everyone using that build shares one OAuth client, which is fine for a small team — each person still signs in with their own Google account.
 - `--adhoc` signs ad-hoc instead, for building on a machine without the team's signing certificate.
+- `--no-dmg` skips building the `.dmg` and produces only the `.zip`.
 
 ---
 

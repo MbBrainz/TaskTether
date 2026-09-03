@@ -104,6 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         applyActivationPolicy()
         setupMenuBar()
         setupBadge()
+        setupLaunchAtLoginDefault()
 
         // Posted by the Settings gear button — the panel must close before
         // the Settings window opens or its .popUpMenu level would cover it.
@@ -111,6 +112,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             forName: .taskTetherHidePanel, object: nil, queue: .main
         ) { [weak self] _ in
             self?.hidePanel()
+        }
+    }
+
+    // Launch at login defaults to ON. Re-registers on every launch (not just
+    // the first) because SMAppService pins the bundle path at registration —
+    // a user who first ran from Downloads and later moved the app to
+    // /Applications would otherwise stay pointed at the stale path.
+    // register() is idempotent, so this is a no-op once already correct.
+    // Skips an ephemeral bundle path (DMG mount or Gatekeeper translocation),
+    // where registering is pointless.
+    private func setupLaunchAtLoginDefault() {
+        guard LoginItemManager.isSupported else { return }
+        if UserDefaults.standard.object(forKey: "launchAtLogin") == nil {
+            UserDefaults.standard.set(true, forKey: "launchAtLogin")
+        }
+        guard UserDefaults.standard.bool(forKey: "launchAtLogin"),
+              !LoginItemManager.isRunningFromEphemeralLocation else { return }
+        do {
+            try LoginItemManager.setEnabled(true)
+        } catch {
+            #if DEBUG
+            print("LoginItemManager: failed to enable launch at login — \(error)")
+            #endif
         }
     }
 

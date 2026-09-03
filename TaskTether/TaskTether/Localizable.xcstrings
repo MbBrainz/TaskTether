@@ -1958,6 +1958,30 @@
           }
         }
       }
+    },
+    "settings.launchAtLogin.label": {
+      "comment": "Toggle label in the Menu Bar section of Settings — launch the app automatically at login.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launch at login"
+          }
+        }
+      }
+    },
+    "settings.launchAtLogin.unsupported": {
+      "comment": "Footer shown under the disabled Launch at login toggle on macOS versions that do not support it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requires macOS 13 or later"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

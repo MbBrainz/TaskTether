@@ -4,7 +4,7 @@
 # for direct sharing (owner + colleague). No notarisation, no App Store.
 #
 # Usage:
-#   scripts/build-release.sh [--credentials <path>] [--team <TEAMID>] [--adhoc] [--out <dir>]
+#   scripts/build-release.sh [--credentials <path>] [--team <TEAMID>] [--adhoc] [--out <dir>] [--no-dmg]
 #
 #   --credentials <path>  Copy this file in as GoogleCredentials.json inside
 #                          the built app's Contents/Resources before signing.
@@ -13,7 +13,9 @@
 #                          Ignored when --adhoc is passed.
 #   --adhoc                Sign with the ad-hoc identity "-" instead of a
 #                          team identity. Use on machines without the cert.
-#   --out <dir>            Output directory for the zip (default: dist/).
+#   --out <dir>            Output directory for the zip and dmg (default: dist/).
+#   --no-dmg               Skip building the drag-to-Applications .dmg (built
+#                          by default alongside the .zip).
 #
 set -euo pipefail
 
@@ -24,6 +26,7 @@ CREDENTIALS=""
 TEAM="${DEVELOPMENT_TEAM:-CRFB3K8FGK}"
 ADHOC=0
 OUT_DIR_ARG="dist"
+DMG_ENABLED=1
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -35,6 +38,8 @@ while [[ $# -gt 0 ]]; do
       ADHOC=1; shift ;;
     --out)
       OUT_DIR_ARG="$2"; shift 2 ;;
+    --no-dmg)
+      DMG_ENABLED=0; shift ;;
     -h|--help)
       grep '^#' "$0" | sed 's/^#//'; exit 0 ;;
     *)
@@ -191,6 +196,102 @@ ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
 ZIP_SIZE="$(du -h "$ZIP_PATH" | cut -f1)"
 ZIP_SHA="$(shasum -a 256 "$ZIP_PATH" | awk '{print $1}')"
 
+# ---------------------------------------------------------------------------
+# Package: DMG with classic drag-to-Applications window
+# ---------------------------------------------------------------------------
+make_dmg() {
+  local dmg_name="TaskTether-${VERSION}.dmg"
+  local dmg_path="$OUT_DIR/$dmg_name"
+  local stage_dir="$OUT_DIR/.dmg-stage"
+  local tmp_dmg="$OUT_DIR/.tmp-${VERSION}.dmg"
+
+  echo "==> Checking for stale TaskTether mounts"
+  local stale_mounts
+  stale_mounts="$(hdiutil info | awk -F'\t' '{print $NF}' | grep -E '^/Volumes/TaskTether( [0-9]+)?$' || true)"
+  if [[ -n "$stale_mounts" ]]; then
+    while IFS= read -r stale_mount; do
+      [[ -z "$stale_mount" ]] && continue
+      echo "warn: detaching stale mount $stale_mount"
+      hdiutil detach "$stale_mount" -force || true
+    done <<< "$stale_mounts"
+  fi
+
+  echo "==> Staging DMG contents"
+  rm -rf "$stage_dir"
+  mkdir -p "$stage_dir"
+  ditto "$APP_PATH" "$stage_dir/TaskTether.app"
+  ln -s /Applications "$stage_dir/Applications"
+
+  rm -f "$tmp_dmg" "$dmg_path"
+  echo "==> Creating read-write DMG"
+  hdiutil create -volname "TaskTether" -srcfolder "$stage_dir" -fs HFS+ -format UDRW -ov "$tmp_dmg"
+
+  echo "==> Attaching DMG to lay out Finder window"
+  local mount_output mount_point
+  mount_output="$(hdiutil attach -readwrite -noverify -noautoopen "$tmp_dmg")"
+  mount_point="$(echo "$mount_output" | grep -E '^/dev/' | awk -F'\t' '{print $NF}' | tail -1)"
+  if [[ -z "$mount_point" ]]; then
+    echo "error: failed to determine DMG mount point" >&2
+    exit 1
+  fi
+  echo "==> Mounted at: $mount_point"
+  local volume_name
+  volume_name="$(basename "$mount_point")"
+
+  if ! osascript <<EOF
+tell application "Finder"
+  tell disk "$volume_name"
+    open
+    set current view of container window to icon view
+    set toolbar visible of container window to false
+    set statusbar visible of container window to false
+    set the bounds of container window to {400, 100, 1000, 500}
+    set theViewOptions to the icon view options of container window
+    set arrangement of theViewOptions to not arranged
+    set icon size of theViewOptions to 128
+    set position of item "TaskTether.app" of container window to {160, 190}
+    set position of item "Applications" of container window to {440, 190}
+    close
+    open
+    update without registering applications
+    delay 1
+  end tell
+end tell
+EOF
+  then
+    echo "warn: Finder layout skipped"
+  fi
+
+  sync
+  hdiutil detach "$mount_point" -force
+  echo "==> Converting to compressed DMG"
+  hdiutil convert "$tmp_dmg" -format UDZO -imagekey zlib-level=9 -o "$dmg_path"
+  rm -f "$tmp_dmg"
+  rm -rf "$stage_dir"
+
+  echo "==> Signing DMG"
+  local dmg_identity
+  if [[ $ADHOC -eq 1 ]]; then
+    dmg_identity="-"
+  else
+    dmg_identity="$(security find-identity -v -p codesigning | grep "$TEAM" | head -1 | awk -F'"' '{print $2}')"
+  fi
+  codesign --force --sign "$dmg_identity" "$dmg_path"
+  echo "==> codesign -dv output:"
+  codesign -dv "$dmg_path" 2>&1 || true
+
+  DMG_PATH="$dmg_path"
+  DMG_SIZE="$(du -h "$dmg_path" | cut -f1)"
+  DMG_SHA="$(shasum -a 256 "$dmg_path" | awk '{print $1}')"
+}
+
+DMG_PATH=""
+DMG_SIZE=""
+DMG_SHA=""
+if [[ $DMG_ENABLED -eq 1 ]]; then
+  make_dmg
+fi
+
 echo ""
 echo "=================================================================="
 echo " Build complete"
@@ -198,14 +299,29 @@ echo "=================================================================="
 echo " Zip:    $ZIP_PATH"
 echo " Size:   $ZIP_SIZE"
 echo " SHA256: $ZIP_SHA"
+if [[ -n "$DMG_PATH" ]]; then
+  echo ""
+  echo " Dmg:    $DMG_PATH"
+  echo " Size:   $DMG_SIZE"
+  echo " SHA256: $DMG_SHA"
+fi
 echo ""
-echo " Recipient instructions:"
-echo "   1. Unzip TaskTether-${VERSION}.zip"
-echo "   2. Move TaskTether.app to /Applications"
-echo "   3. First launch: right-click (or Control-click) TaskTether.app and"
-echo "      choose Open, then confirm in the Gatekeeper dialog — this app is"
-echo "      not notarised, so a plain double-click will be blocked the first time."
-echo "   4. If GoogleCredentials.json was not baked in, add it yourself:"
+echo " Recipient instructions (.dmg — recommended):"
+echo "   1. Open TaskTether-${VERSION}.dmg"
+echo "   2. Drag TaskTether.app onto the Applications shortcut"
+echo "   3. Eject the TaskTether disk image"
+echo "   4. First launch: right-click (or Control-click) TaskTether.app in"
+echo "      /Applications and choose Open, then confirm in the Gatekeeper"
+echo "      dialog — this app is not notarised, so a plain double-click"
+echo "      will be blocked the first time."
+echo "   5. TaskTether registers itself to launch at login on first start"
+echo "      (macOS 13+); a toggle in Settings controls this."
+echo "   6. If GoogleCredentials.json was not baked in, add it yourself:"
 echo "      right-click TaskTether.app -> Show Package Contents ->"
 echo "      Contents/Resources/ -> drop in GoogleCredentials.json."
+echo ""
+echo " Recipient instructions (.zip — alternative):"
+echo "   1. Unzip TaskTether-${VERSION}.zip"
+echo "   2. Move TaskTether.app to /Applications"
+echo "   3. Follow steps 4-6 above."
 echo "=================================================================="
