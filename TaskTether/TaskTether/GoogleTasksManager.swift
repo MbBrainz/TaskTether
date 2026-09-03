@@ -21,7 +21,46 @@ class GoogleTasksManager: ObservableObject {
     init(authManager: GoogleAuthManager) {
         self.authManager = authManager
     }
-    
+
+    // MARK: - URL Building
+
+    enum GoogleTasksError: Error {
+        case invalidURL
+    }
+
+    /// Builds a Google Tasks API URL for a task list, optionally a specific task
+    /// and/or trailing action (e.g. "move"), percent-encoding IDs via URLComponents
+    /// so an unexpected character in an API-returned ID can never crash the app via
+    /// a force-unwrapped `URL(string:)`.
+    private func tasksURL(
+        listId: String,
+        taskId: String? = nil,
+        action: String? = nil,
+        query: [URLQueryItem] = []
+    ) throws -> URL {
+        guard var components = URLComponents(string: baseURL) else {
+            throw GoogleTasksError.invalidURL
+        }
+        var segments = [components.percentEncodedPath, "lists", encodedPathSegment(listId), "tasks"]
+        if let taskId { segments.append(encodedPathSegment(taskId)) }
+        if let action { segments.append(action) }
+        components.percentEncodedPath = segments.joined(separator: "/")
+        if !query.isEmpty { components.queryItems = query }
+        guard let url = components.url else {
+            throw GoogleTasksError.invalidURL
+        }
+        return url
+    }
+
+    private func encodedPathSegment(_ raw: String) -> String {
+        // RFC 3986 unreserved characters only. .urlPathAllowed leaves "/",
+        // "+", "=", and "&" unescaped, but Google Tasks IDs are standard
+        // base64 and may contain any of those — an unescaped "/" would
+        // split the path into extra segments, corrupting the request URL.
+        let unreserved = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._~"))
+        return raw.addingPercentEncoding(withAllowedCharacters: unreserved) ?? raw
+    }
+
     // MARK: - Setup
     
     private var hasSetup = false
@@ -265,7 +304,8 @@ class GoogleTasksManager: ObservableObject {
             taskData["due"] = Self.utcNoonString(from: dueDate)
         }
 
-        var request = URLRequest(url: URL(string: "\(baseURL)/lists/\(listId)/tasks")!)
+        guard let requestURL = try? tasksURL(listId: listId) else { completion?(nil); return }
+        var request = URLRequest(url: requestURL)
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -307,7 +347,8 @@ class GoogleTasksManager: ObservableObject {
         guard let token = authManager.getAccessToken(),
               let listId = taskListId else { return }
         
-        var request = URLRequest(url: URL(string: "\(baseURL)/lists/\(listId)/tasks/\(taskId)")!)
+        guard let requestURL = try? tasksURL(listId: listId, taskId: taskId) else { return }
+        var request = URLRequest(url: requestURL)
         request.httpMethod = "PATCH"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -345,7 +386,8 @@ class GoogleTasksManager: ObservableObject {
             taskData["due"] = NSNull()
         }
 
-        var request = URLRequest(url: URL(string: "\(baseURL)/lists/\(listId)/tasks/\(taskId)")!)
+        guard let requestURL = try? tasksURL(listId: listId, taskId: taskId) else { return }
+        var request = URLRequest(url: requestURL)
         request.httpMethod = "PATCH"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -383,12 +425,13 @@ class GoogleTasksManager: ObservableObject {
         guard let token = authManager.getAccessToken(),
               let listId = taskListId else { return }
 
-        var urlString = "\(baseURL)/lists/\(listId)/tasks/\(taskId)/move"
+        var queryItems: [URLQueryItem] = []
         if let prev = previousTaskId {
-            urlString += "?previous=\(prev)"
+            queryItems.append(URLQueryItem(name: "previous", value: prev))
         }
+        guard let requestURL = try? tasksURL(listId: listId, taskId: taskId, action: "move", query: queryItems) else { return }
 
-        var request = URLRequest(url: URL(string: urlString)!)
+        var request = URLRequest(url: requestURL)
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
@@ -411,7 +454,8 @@ class GoogleTasksManager: ObservableObject {
         guard let token = authManager.getAccessToken(),
               let listId = taskListId else { return }
 
-        var request = URLRequest(url: URL(string: "\(baseURL)/lists/\(listId)/tasks/\(taskId)")!)
+        guard let requestURL = try? tasksURL(listId: listId, taskId: taskId) else { return }
+        var request = URLRequest(url: requestURL)
         request.httpMethod = "DELETE"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 

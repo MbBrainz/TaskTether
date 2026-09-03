@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 import AppKit
+import CryptoKit
 
 class GoogleAuthManager: ObservableObject {
 
@@ -27,6 +28,13 @@ class GoogleAuthManager: ObservableObject {
     private var redirectURI = ""
     private let scope = "https://www.googleapis.com/auth/tasks"
     private let server = LocalHTTPServer()
+
+    // CSRF/PKCE material for the in-flight sign-in attempt only. Set at the
+    // start of signIn(), consumed exactly once by handleCallback(), and
+    // cleared immediately after — a captured or replayed redirect can't be
+    // used to exchange a code a second time.
+    private var pendingState: String?
+    private var pendingCodeVerifier: String?
 
     init() {
         loadCredentials()
@@ -56,34 +64,47 @@ class GoogleAuthManager: ObservableObject {
         errorMessage = nil
 
         // Tear down any stale listener from a previous abandoned attempt
-        // before starting a new one — otherwise port 8080 stays locked.
+        // before starting a new one — otherwise the port stays locked.
         server.stop()
+
+        let state = randomBase64URLToken()
+        let verifier = randomBase64URLToken()
+        pendingState = state
+        pendingCodeVerifier = verifier
+        let challenge = codeChallenge(for: verifier)
 
         // Start the local listener on an ephemeral port. The browser is only
         // opened AFTER the listener reports it is ready — opening it earlier
         // (as the old fixed-port code did) let the user approve access while
         // nothing of ours was listening, silently losing the auth code.
         server.start(
-            onCode: { [weak self] code in
-                self?.exchangeCodeForTokens(code: code)
+            onResult: { [weak self] result in
+                DispatchQueue.main.async {
+                    self?.handleCallback(result)
+                }
             },
             onReady: { [weak self] port in
                 DispatchQueue.main.async {
-                    self?.openAuthURL(port: port)
+                    self?.openAuthURL(port: port, state: state, codeChallenge: challenge)
                 }
             }
         )
     }
 
-    private func openAuthURL(port: UInt16?) {
+    private func openAuthURL(port: UInt16?, state: String, codeChallenge: String) {
         guard let port else {
             errorMessage = String(localized: "error.auth.port")
             isAuthenticating = false
             server.stop()
+            clearPendingAuthState()
             return
         }
 
-        redirectURI = "http://localhost:\(port)"
+        // 127.0.0.1, not "localhost" — the listener binds the loopback
+        // IPv4 address only, and some browsers resolve "localhost" to ::1
+        // first, which would never reach it. Google's desktop OAuth clients
+        // explicitly support (and recommend) a literal loopback IP here.
+        redirectURI = "http://127.0.0.1:\(port)"
 
         // Build the Google auth URL
         var components = URLComponents(string: "https://accounts.google.com/o/oauth2/v2/auth")!
@@ -93,13 +114,17 @@ class GoogleAuthManager: ObservableObject {
             URLQueryItem(name: "response_type", value: "code"),
             URLQueryItem(name: "scope", value: scope),
             URLQueryItem(name: "access_type", value: "offline"),
-            URLQueryItem(name: "prompt", value: "consent")
+            URLQueryItem(name: "prompt", value: "consent"),
+            URLQueryItem(name: "state", value: state),
+            URLQueryItem(name: "code_challenge", value: codeChallenge),
+            URLQueryItem(name: "code_challenge_method", value: "S256")
         ]
 
         guard let authURL = components.url else {
             errorMessage = String(localized: "error.auth.url")
             isAuthenticating = false
             server.stop()
+            clearPendingAuthState()
             return
         }
 
@@ -107,9 +132,63 @@ class GoogleAuthManager: ObservableObject {
         NSWorkspace.shared.open(authURL)
     }
 
+    // MARK: - Callback Handling
+
+    /// Handles the local server's result: an access-denied redirect, a
+    /// malformed/CSRF-suspect one (missing or non-matching `state`), or a
+    /// valid code+state pair ready for token exchange.
+    private func handleCallback(_ result: Result<AuthCallback, Error>) {
+        switch result {
+        case .success(let callback):
+            guard let verifier = pendingCodeVerifier, stateMatches(callback.state) else {
+                clearPendingAuthState()
+                DispatchQueue.main.async {
+                    self.isAuthenticating = false
+                    self.errorMessage = String(localized: "error.auth.token")
+                }
+                return
+            }
+            clearPendingAuthState()
+            exchangeCodeForTokens(code: callback.code, codeVerifier: verifier)
+        case .failure:
+            clearPendingAuthState()
+            DispatchQueue.main.async {
+                self.isAuthenticating = false
+                self.errorMessage = String(localized: "error.auth.token")
+            }
+        }
+    }
+
+    private func stateMatches(_ received: String?) -> Bool {
+        guard let expected = pendingState, let received, expected == received else { return false }
+        return true
+    }
+
+    private func clearPendingAuthState() {
+        pendingState = nil
+        pendingCodeVerifier = nil
+    }
+
+    // MARK: - PKCE / State
+
+    /// 32 random bytes, base64url-encoded (no padding) — 43 characters,
+    /// suitable for both the OAuth `state` parameter and a PKCE
+    /// `code_verifier` (RFC 7636 requires 43-128 characters).
+    private func randomBase64URLToken() -> String {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        precondition(status == errSecSuccess, "SecRandomCopyBytes failed")
+        return Data(bytes).base64URLEncodedString()
+    }
+
+    private func codeChallenge(for verifier: String) -> String {
+        let digest = SHA256.hash(data: Data(verifier.utf8))
+        return Data(digest).base64URLEncodedString()
+    }
+
     // MARK: - Token Exchange
 
-    private func exchangeCodeForTokens(code: String) {
+    private func exchangeCodeForTokens(code: String, codeVerifier: String) {
         var request = URLRequest(url: URL(string: "https://oauth2.googleapis.com/token")!)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
@@ -119,7 +198,8 @@ class GoogleAuthManager: ObservableObject {
             "client_id": clientId,
             "client_secret": clientSecret,
             "redirect_uri": redirectURI,
-            "grant_type": "authorization_code"
+            "grant_type": "authorization_code",
+            "code_verifier": codeVerifier
         ].map { "\($0.key)=\($0.value)" }.joined(separator: "&")
 
         request.httpBody = body.data(using: .utf8)
@@ -152,6 +232,8 @@ class GoogleAuthManager: ObservableObject {
         accessToken  = nil
         refreshToken = nil
         clearTokensFromKeychain()
+        server.stop()
+        clearPendingAuthState()
 
         DispatchQueue.main.async {
             self.isAuthenticated = false
@@ -305,7 +387,12 @@ class GoogleAuthManager: ObservableObject {
             kSecValueData as String:   data
         ]
         SecItemDelete(query as CFDictionary)
-        SecItemAdd(query as CFDictionary, nil)
+        let status = SecItemAdd(query as CFDictionary, nil)
+        #if DEBUG
+        if status != errSecSuccess {
+            print("GoogleAuthManager: keychain save failed for '\(key)' — status \(status)")
+        }
+        #endif
     }
 
     private func loadFromKeychain(key: String) -> String? {
@@ -329,6 +416,17 @@ class GoogleAuthManager: ObservableObject {
             kSecAttrAccount as String: key
         ]
         SecItemDelete(query as CFDictionary)
+    }
+}
+
+private extension Data {
+    /// RFC 4648 base64url, unpadded — used for the OAuth `state` value and
+    /// PKCE `code_verifier`/`code_challenge`.
+    func base64URLEncodedString() -> String {
+        base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
     }
 }
 
