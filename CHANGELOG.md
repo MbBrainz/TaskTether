@@ -4,6 +4,14 @@ All notable changes to TaskTether are documented here.
 
 ---
 
+## [1.1.1] — 2026-09-03
+
+### Added
+- **Launch at login** — TaskTether registers itself as a login item on first start (macOS 13 or later) and re-checks on every launch; a Settings → Menu Bar toggle controls it and reflects the real login-item status.
+- **DMG packaging** — `scripts/build-release.sh` now also produces a signed, classic drag-to-Applications `.dmg` alongside the `.zip` (skip with `--no-dmg`).
+
+---
+
 ## [1.1.0] — 2026-09-03
 
 ### Security
@@ -20,7 +28,6 @@ All notable changes to TaskTether are documented here.
 - **Menu bar badge** — shows the number of incomplete tasks (Settings → Menu Bar toggle, on by default).
 - **Sync failure notification** — a macOS notification appears when sync fails three times in a row, and periodically thereafter while it keeps failing.
 - **`scripts/build-release.sh`** — builds a signed (not notarised) distributable .zip into `dist/`, optionally baking in `GoogleCredentials.json` (`--credentials`) or ad-hoc signing (`--adhoc`).
-- **DMG packaging** — `scripts/build-release.sh` now also produces a signed, classic drag-to-Applications `.dmg` alongside the `.zip` (skip with `--no-dmg`).
 
 ### Changed
 - **README cleanup** — removed the stale step to register a `http://localhost:8080` redirect URI (the app now picks a free loopback port automatically); added binary installation and Gatekeeper instructions.
