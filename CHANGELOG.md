@@ -8,6 +8,7 @@ All notable changes to TaskTether are documented here.
 
 ### Changed
 - **Popover lists only tasks due today** — overdue tasks are no longer listed above today's tasks. With every Reminders list syncing, the overdue set ran into the hundreds and buried the day. The overdue row indicator is unchanged for tasks that are due today.
+- **Release script requires a signing team** — `scripts/build-release.sh` no longer defaults to a hardcoded team ID; pass `--team <TEAMID>` (or set `DEVELOPMENT_TEAM`) or use `--adhoc`.
 - **Menu bar task count is off by default** — the badge counted every incomplete task across all lists. It can still be turned on in Settings → "Show task count in menu bar".
 
 ---

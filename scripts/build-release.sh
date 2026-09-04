@@ -8,9 +8,10 @@
 #
 #   --credentials <path>  Copy this file in as GoogleCredentials.json inside
 #                          the built app's Contents/Resources before signing.
-#   --team <TEAMID>       Development team to sign with (default: CRFB3K8FGK,
-#                          overridable via the DEVELOPMENT_TEAM env var).
-#                          Ignored when --adhoc is passed.
+#   --team <TEAMID>       Signing identity to use: the ID shown in parentheses
+#                          by `security find-identity -v -p codesigning`.
+#                          Required unless --adhoc is passed; may also be
+#                          supplied via the DEVELOPMENT_TEAM env var.
 #   --adhoc                Sign with the ad-hoc identity "-" instead of a
 #                          team identity. Use on machines without the cert.
 #   --out <dir>            Output directory for the zip and dmg (default: dist/).
@@ -23,7 +24,7 @@ set -euo pipefail
 # Argument parsing
 # ---------------------------------------------------------------------------
 CREDENTIALS=""
-TEAM="${DEVELOPMENT_TEAM:-CRFB3K8FGK}"
+TEAM="${DEVELOPMENT_TEAM:-}"
 ADHOC=0
 OUT_DIR_ARG="dist"
 DMG_ENABLED=1
@@ -57,6 +58,13 @@ fi
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+if [[ $ADHOC -eq 0 && -z "$TEAM" ]]; then
+  echo "error: no signing team given. Pass --team <TEAMID> (or set DEVELOPMENT_TEAM)," >&2
+  echo "       or use --adhoc to sign without a certificate. Available identities:" >&2
+  security find-identity -v -p codesigning >&2 || true
+  exit 1
+fi
+
 XCODEPROJ="$ROOT_DIR/TaskTether/TaskTether.xcodeproj"
 ENTITLEMENTS="$ROOT_DIR/TaskTether/TaskTether/TaskTether.entitlements"
 

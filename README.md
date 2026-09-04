@@ -123,11 +123,12 @@ Requires Xcode 15 or later.
 `scripts/build-release.sh` builds, signs, and packages the app for sharing:
 
 ```bash
-scripts/build-release.sh --credentials /path/to/GoogleCredentials.json
+scripts/build-release.sh --team <TEAMID> --credentials /path/to/GoogleCredentials.json
 ```
 
 The signed app lands in both `dist/TaskTether-<version>.dmg` (a classic drag-to-Applications disk image — recommended) and `dist/TaskTether-<version>.zip`. Both are signed with an Apple Development certificate, not notarised — recipients still need the right-click → Open step above.
 
+- `--team <TEAMID>` selects the signing certificate: the ID shown in parentheses by `security find-identity -v -p codesigning`. Required unless `--adhoc` is passed; `DEVELOPMENT_TEAM` in the environment works too.
 - `--credentials <path>` bakes `GoogleCredentials.json` into the app bundle before signing, so the recipient can skip the Google Cloud setup entirely. This is the recommended way to share a build with a teammate. Everyone using that build shares one OAuth client, which is fine for a small team — each person still signs in with their own Google account.
 - `--adhoc` signs ad-hoc instead, for building on a machine without the team's signing certificate.
 - `--no-dmg` skips building the `.dmg` and produces only the `.zip`.
