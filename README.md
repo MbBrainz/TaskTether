@@ -23,10 +23,15 @@ Apple Reminders  ◄──────────────►  Google Tasks
 
 TaskTether runs as a menu bar app on your Mac. On a configurable interval it compares your Reminders and Google Tasks lists, detects differences, and syncs changes in both directions using Apple's native EventKit framework and the Google Tasks API.
 
+Every editable Reminders list is synced with a Google Tasks list of the same name — this includes the default "Reminders" list and Google's "My Tasks". A list created on either side is created on the other side automatically, and renaming a list on one side renames its counterpart. Moving a task from one list to another follows the same rule: the move happens on the other side too.
+
+Lists are paired by name the first time they're seen; after that, the pairing tracks the list itself, so renaming it doesn't break the sync. Deleting a list is never mirrored — if you delete a list on one side, its counterpart on the other side simply stops syncing and keeps its tasks. If you want to stop a list from syncing entirely, delete it on one side; if you also want the tasks gone, delete the other side's list yourself.
+
 ---
 
 ## Features
 
+- **Multi-list sync** — every Reminders list syncs with a Google Tasks list of the same name; lists created, renamed, or moved between on either side follow on the other
 - **Two-way sync** — changes on either side propagate automatically
 - **Conflict resolution** — most recently modified version wins
 - **Subtask support** — subtasks from Google Tasks appear grouped under their parent

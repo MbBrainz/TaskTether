@@ -4,6 +4,21 @@ All notable changes to TaskTether are documented here.
 
 ---
 
+## [1.2.0] — 2026-09-04
+
+### Added
+- **Multi-list sync** — TaskTether no longer syncs a single hardcoded "TaskTether" list. Every editable Reminders list now syncs with a Google Tasks list of the same name, including the default "Reminders" list and Google's "My Tasks". A list created on either side is created on the other. Renaming a list on one side renames its counterpart. Moving a task from one list to another on either side moves it on the other side too.
+
+### Changed
+- **List deletion is never mirrored** — deleting a list on one side no longer has any effect on the other side. The surviving list keeps its tasks and simply stops syncing; deleting it too is a separate, deliberate action.
+- **Migration** — the first sync after upgrading is a one-time reconciliation pass that never deletes anything; it re-links existing tasks and pairs the old "TaskTether" lists on each side automatically by name.
+
+### Fixed
+- **Fetch failures no longer look like empty lists** — a network error, non-2xx response or unreadable reply from Google, or an EventKit failure, now aborts that sync cycle with an error state instead of being read as "the list is empty". Previously three consecutive failed cycles (for example, being offline for 45 minutes at the 15-minute interval) could delete tasks.
+- **Tasks moved into a non-synced list are parked, not deleted** — a linked task moved into a list that no longer syncs (a retired pair's survivor or a read-only list) keeps its counterpart; nothing is deleted on the other side.
+
+---
+
 ## [1.1.1] — 2026-09-03
 
 ### Added

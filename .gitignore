@@ -6,3 +6,4 @@ DerivedData/
 TaskTether/TaskTether.xcodeproj/project.xcworkspace/xcuserdata/
 TaskTether/TaskTether/GoogleCredentials.json
 dist
+scratch

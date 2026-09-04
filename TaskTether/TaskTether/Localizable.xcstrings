@@ -189,24 +189,24 @@
       }
     },
     "error.reminders.createlist": {
-      "comment": "Error shown when the TaskTether list cannot be created in Reminders. %@ is replaced with the system error description.",
+      "comment": "Error shown when a Reminders list cannot be created. %@ is replaced with the system error description.",
       "localizations": {
         "ar": {
           "stringUnit": {
-            "state": "translated",
-            "value": "تعذّر إنشاء قائمة TaskTether: %@"
+            "state": "needs_review",
+            "value": "Could not create Reminders list: %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Could not create TaskTether list: %@"
+            "value": "Could not create Reminders list: %@"
           }
         },
         "hu": {
           "stringUnit": {
-            "state": "translated",
-            "value": "Nem sikerült létrehozni a TaskTether listát: %@"
+            "state": "needs_review",
+            "value": "Could not create Reminders list: %@"
           }
         }
       }
@@ -258,24 +258,24 @@
       }
     },
     "error.tasks.createlist": {
-      "comment": "Error shown when the TaskTether list cannot be created in Google Tasks.",
+      "comment": "Error shown when a Google Tasks list cannot be created.",
       "localizations": {
         "ar": {
           "stringUnit": {
-            "state": "translated",
-            "value": "تعذّر إنشاء قائمة TaskTether"
+            "state": "needs_review",
+            "value": "Could not create Google Tasks list"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Could not create TaskTether list"
+            "value": "Could not create Google Tasks list"
           }
         },
         "hu": {
           "stringUnit": {
-            "state": "translated",
-            "value": "Nem sikerült létrehozni a TaskTether listát"
+            "state": "needs_review",
+            "value": "Could not create Google Tasks list"
           }
         }
       }
@@ -299,6 +299,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nem sikerült lekérni a feladatlistákat"
+          }
+        }
+      }
+    },
+    "error.sync.fetch.google": {
+      "comment": "Error shown when fetching a specific Google Tasks list's tasks fails during sync. The first %@ is the list title, the second %@ is the system error description.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Could not fetch Google Tasks list %@: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not fetch Google Tasks list %@: %@"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Could not fetch Google Tasks list %@: %@"
+          }
+        }
+      }
+    },
+    "error.sync.fetch.reminders": {
+      "comment": "Error shown when fetching Reminders fails during sync. %@ is the system error description.",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Could not read Reminders: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not read Reminders: %@"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Could not read Reminders: %@"
           }
         }
       }
@@ -1591,20 +1637,20 @@
       "localizations": {
         "ar": {
           "stringUnit": {
-            "state": "translated",
-            "value": "لا توجد مهام مستحقة في قائمة TaskTether اليوم."
+            "state": "needs_review",
+            "value": "Nothing due today."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nothing due in your TaskTether list today. "
+            "value": "Nothing due today."
           }
         },
         "hu": {
           "stringUnit": {
-            "state": "translated",
-            "value": "Nincs esedékes feladat a TaskTether listádban ma."
+            "state": "needs_review",
+            "value": "Nothing due today."
           }
         }
       }

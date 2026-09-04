@@ -30,6 +30,12 @@ struct TetherTask: Identifiable, Equatable {
     var googleTasksId: String?         // Google Tasks API id field
     var parentGoogleId: String?        // Google Tasks parent ID — nil for top-level tasks
 
+    // Id of the ListPair this task belongs to (D7). Set by SyncEngine when a
+    // task is attributed to a list pair; nil only for a task created
+    // optimistically in the UI before it has been placed, and for rows read
+    // from a pre-multi-list snapshot (which SnapshotStore rejects outright).
+    var listPairId: String?
+
     // MARK: - Content
 
     var title:       String
@@ -106,6 +112,7 @@ extension TetherTask {
         self.remindersId    = reminder.calendarItemIdentifier
         self.googleTasksId  = nil
         self.parentGoogleId = nil
+        self.listPairId     = nil
         self.title          = reminder.title ?? ""
         self.isCompleted   = reminder.isCompleted
 
@@ -153,6 +160,7 @@ extension TetherTask {
         self.remindersId    = nil
         self.googleTasksId  = googleTask.id
         self.parentGoogleId = googleTask.parentId
+        self.listPairId     = nil
         self.title          = googleTask.title
         self.notes         = googleTask.notes
         self.isCompleted   = googleTask.isCompleted
