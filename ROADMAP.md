@@ -41,8 +41,8 @@ Ideas that are on the radar but not yet prioritised.
 - [ ] **More languages** — contributions welcome via LOCALISING.md
 - [ ] **More themes** — contributions welcome via the custom theme JSON format
 - [ ] **Due date editing** — change a task's due date from within TaskTether
-- [ ] **Multiple task lists** — currently syncs the TaskTether list only
-- [ ] **Overdue task indicator** — visual flag for tasks past their due date
-- [ ] **Menu bar badge** — show incomplete task count on the menu bar icon
+- [x] **Multiple task lists** — shipped in 1.2.0: every editable Reminders list syncs with a Google Tasks list of the same name
+- [x] **Overdue task indicator** — shipped in 1.1.1 (row flag only; overdue tasks are not listed in the popover)
+- [x] **Menu bar badge** — shipped in 1.1.1, off by default since 1.2.1 (Settings → Show task count in menu bar)
 - [ ] **iCloud sync for settings** — sync theme and preferences across Macs
 

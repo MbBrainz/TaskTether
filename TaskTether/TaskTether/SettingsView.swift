@@ -101,10 +101,10 @@ private struct GeneralSettingsTab: View {
     @State private var showInDock: Bool = UserDefaults.standard.bool(forKey: "showInDock")
 
     // Reads and writes the menu bar badge preference stored in UserDefaults.
-    // Defaults to true (shown) when the key has never been set — unlike
-    // showInDock above, which defaults to false.
+    // Defaults to false (hidden) when the key has never been set: with every
+    // list syncing the count is in the hundreds and reads as noise.
     @State private var showMenuBarBadge: Bool =
-        UserDefaults.standard.object(forKey: "showMenuBarBadge") as? Bool ?? true
+        UserDefaults.standard.object(forKey: "showMenuBarBadge") as? Bool ?? false
 
     // Reads and writes the launch-at-login preference. Defaults to true
     // (matching the first-launch behaviour in AppDelegate) when the key has

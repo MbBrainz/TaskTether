@@ -4,6 +4,14 @@ All notable changes to TaskTether are documented here.
 
 ---
 
+## [1.2.1] — 2026-09-04
+
+### Changed
+- **Popover lists only tasks due today** — overdue tasks are no longer listed above today's tasks. With every Reminders list syncing, the overdue set ran into the hundreds and buried the day. The overdue row indicator is unchanged for tasks that are due today.
+- **Menu bar task count is off by default** — the badge counted every incomplete task across all lists. It can still be turned on in Settings → "Show task count in menu bar".
+
+---
+
 ## [1.2.0] — 2026-09-04
 
 ### Added

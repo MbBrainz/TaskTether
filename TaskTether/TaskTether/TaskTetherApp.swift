@@ -218,7 +218,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func updateBadge() {
         guard let button = statusItem?.button else { return }
 
-        let enabled = UserDefaults.standard.object(forKey: "showMenuBarBadge") as? Bool ?? true
+        let enabled = UserDefaults.standard.object(forKey: "showMenuBarBadge") as? Bool ?? false
         let count = syncEngine.tasks.filter { !$0.isCompleted && $0.parentGoogleId == nil }.count
 
         button.imagePosition = .imageLeading
